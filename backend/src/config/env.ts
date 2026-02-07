@@ -4,5 +4,7 @@ dotenv.config();
 
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
-  port: Number(process.env.PORT) || 3188,
+  httpPort: Number(process.env.HTTP_PORT) || 3188,
+  httpsPort: Number(process.env.HTTPS_PORT) || 3189,
+  host: process.env.HOST || "localhost",
 };

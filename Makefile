@@ -14,5 +14,7 @@ dev:
 	make -j2 backend frontend
 
 clean:
-	cd backend && rm -rf node_modules dist
+	cd backend && rm -rf node_modules dist cert
 	cd frontend && rm -rf node_modules build
+certificate:
+	openssl req -nodes -new -x509 -keyout backend/cert/private.key -out backend/cert/certificate.crt -days 365

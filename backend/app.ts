@@ -1,19 +1,16 @@
 import express from "express";
 import { errorHandler } from "./src/middlewares/error.middleware";
 import homeRoutes from "./src/modules/home/home.routes";
-import helmet from "helmet";
-import morgan from "morgan";
-import cors from "cors";
+import authRoutes from "./src/modules/auth/auth.routes";
 
 export const app = express();
 
 // middlewares
-app.use(helmet());
-app.use(cors());
-app.use(morgan("dev"));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // routes
 app.use("/", homeRoutes);
+app.use("/", authRoutes);
 // Érreurs middleware
 app.use(errorHandler);
