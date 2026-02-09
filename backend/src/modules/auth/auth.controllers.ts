@@ -6,6 +6,7 @@ import { Request, Response } from "express";
  * les paramètres de la requête (username, password, etc.) pour le développement.
  */
 export const loginUser = (req: Request, res: Response) => {
-  console.log(req.query);
+  console.log("Username: " + req.query.username);
+  console.log("Password: " + req.query.password);
   res.redirect("/");
 };
