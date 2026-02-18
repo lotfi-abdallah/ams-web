@@ -10,7 +10,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // routes
-app.use("/", homeRoutes);
-app.use("/", authRoutes);
+// app.use("/", homeRoutes);
+// app.use("/", authRoutes);
+
+app.use(express.static("../frontend/dist/frontend/browser"));
+app.get("/*rest", (req, res) => {
+  res.sendFile("index.html", { root: "../frontend/dist/frontend/browser" });
+});
+
 // Érreurs middleware
 app.use(errorHandler);
