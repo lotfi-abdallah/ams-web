@@ -31,7 +31,6 @@ export class Login {
 
     this.api.post('auth/login', { email, password }).subscribe({
       next: (response) => {
-        console.log('Login successful:', response);
         // Handle successful login, e.g., store token, navigate to home, etc.
       },
       error: (error) => {
