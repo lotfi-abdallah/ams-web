@@ -15,8 +15,16 @@ export const loginUser = async (req: Request, res: Response) => {
     const user = await validateUserCredentials(email, password);
 
     if (!user) {
+      console.log("no user found with email:", email);
       return res.status(401).json({ message: "Invalid credentials" });
     }
+
+    console.log("user authenticated:", {
+      id: user.id,
+      mail: user.mail,
+      nom: user.nom,
+      prenom: user.prenom,
+    });
 
     return res.status(200).json({
       message: "Login successful",
@@ -38,9 +46,10 @@ const validateUserCredentials = async (
   email: string,
   password: string,
 ): Promise<Compte | null> => {
-  const result = await pool.query("SELECT * FROM compte WHERE mail = $1", [
-    email,
-  ]);
+  const result = await pool.query(
+    "SELECT * FROM fredouil.compte WHERE mail = $1",
+    [email],
+  );
   if (result.rows.length === 0) {
     return null;
   }
