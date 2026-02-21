@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { ApiService } from './api.service';
+import { tap } from 'rxjs';
 
 export interface User {
   id: number;
@@ -23,7 +24,7 @@ export class AuthService {
   }
 
   logout() {
-    return this.api.post('auth/logout', {});
+    return this.api.post('auth/logout', {}).pipe(tap(() => this._user.set(null)));
   }
 
   fetchCurrentUser() {
