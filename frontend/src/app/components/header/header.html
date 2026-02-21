@@ -10,12 +10,27 @@
         </ul>
       </nav>
       <div class="flex space-x-4">
-        <a
-          href="/login"
-          class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
-        >
-          Login
-        </a>
+        @if (auth.user()) {
+          <a
+            href="/profile"
+            class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+          >
+            Profile
+          </a>
+          <button
+            (click)="auth.logout()"
+            class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+          >
+            Logout
+          </button>
+        } @else {
+          <a
+            href="/login"
+            class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+          >
+            Login
+          </a>
+        }
       </div>
     </div>
   </div>

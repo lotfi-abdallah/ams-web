@@ -1,7 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { form } from '@angular/forms/signals';
+import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 
 interface LoginData {
   email: string;
@@ -21,7 +23,11 @@ export class Login {
   loginForm = form(this.loginData);
   errorMessage = signal<string | null>(null);
 
-  constructor(private api: ApiService) {}
+  constructor(
+    private api: ApiService,
+    private auth: AuthService,
+    private router: Router,
+  ) {}
 
   onSubmit(event: Event) {
     event.preventDefault();
@@ -31,7 +37,9 @@ export class Login {
 
     this.api.post('auth/login', { email, password }).subscribe({
       next: (response) => {
-        // Handle successful login, e.g., store token, navigate to home, etc.
+        this.auth.fetchCurrentUser();
+        // navigate to / homepage
+        this.router.navigate(['/']);
       },
       error: (error) => {
         if (error.status === 401) {

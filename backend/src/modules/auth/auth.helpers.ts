@@ -33,7 +33,7 @@ export const updateConnectionStatus = async (
 ): Promise<boolean> => {
   try {
     await pool.query(
-      "UPDATE fredouil.compte SET isconnected = $1 WHERE id = $2",
+      "UPDATE fredouil.compte SET statut_connexion = $1 WHERE id = $2",
       [isConnected, userId],
     );
     return true;

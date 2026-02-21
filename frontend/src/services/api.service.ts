@@ -7,23 +7,23 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:3188/api';
+  private baseUrl = '/api';
 
   constructor(private http: HttpClient) {}
 
   get<T>(endpoint: string): Observable<T> {
-    return this.http.get<T>(`${this.baseUrl}/${endpoint}`);
+    return this.http.get<T>(`${this.baseUrl}/${endpoint}`, { withCredentials: true });
   }
 
   post<T>(endpoint: string, body: any): Observable<T> {
-    return this.http.post<T>(`${this.baseUrl}/${endpoint}`, body);
+    return this.http.post<T>(`${this.baseUrl}/${endpoint}`, body, { withCredentials: true });
   }
 
   put<T>(endpoint: string, body: any): Observable<T> {
-    return this.http.put<T>(`${this.baseUrl}/${endpoint}`, body);
+    return this.http.put<T>(`${this.baseUrl}/${endpoint}`, body, { withCredentials: true });
   }
 
   delete<T>(endpoint: string): Observable<T> {
-    return this.http.delete<T>(`${this.baseUrl}/${endpoint}`);
+    return this.http.delete<T>(`${this.baseUrl}/${endpoint}`, { withCredentials: true });
   }
 }

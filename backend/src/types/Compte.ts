@@ -7,5 +7,5 @@ export interface Compte {
   nom: string;
   prenom: string;
   avatar: string;
-  status_connexion: number;
+  statut_connexion: number;
 }

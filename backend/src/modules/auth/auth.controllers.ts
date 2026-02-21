@@ -29,6 +29,8 @@ export const loginUser = async (req: Request, res: Response) => {
         .json({ message: "Failed to update connection status" });
     }
 
+    req.session.user = { id: user.id, mail: user.mail };
+
     return res.status(200).json({
       message: "Login successful",
       user: {
@@ -43,4 +45,43 @@ export const loginUser = async (req: Request, res: Response) => {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
   }
+};
+
+export const logoutUser = async (req: Request, res: Response) => {
+  if (!req.session || !req.session.user || !req.session.user.id) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
+  const userId = req.session.user.id;
+
+  try {
+    const isUpdated = await updateConnectionStatus(userId, 0);
+
+    if (!isUpdated) {
+      console.log("Failed to update connection status for user:", userId);
+      return res
+        .status(500)
+        .json({ message: "Failed to update connection status" });
+    }
+
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Error destroying session:", err);
+        return res.status(500).json({ message: "Failed to log out" });
+      }
+      res.clearCookie("connect.sid");
+      return res.status(200).json({ message: "Logout successful" });
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getMe = (req: Request, res: Response) => {
+  if (!req.session || !req.session.user) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
+  return res.status(200).json({ user: req.session.user });
 };
