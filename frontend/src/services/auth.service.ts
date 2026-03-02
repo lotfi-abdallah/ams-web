@@ -33,4 +33,22 @@ export class AuthService {
       error: () => this._user.set(null),
     });
   }
+
+  saveLatestConnection() {
+    const user = this._user();
+    if (user != null) {
+      const latestConnectionKey = `latestConnection_${user.id}`;
+      localStorage.setItem(latestConnectionKey, new Date().toISOString());
+    }
+  }
+
+  getLatestConnection(): string | null {
+    const user = this._user();
+    if (!user) {
+      return null;
+    }
+
+    const latestConnectionKey = `latestConnection_${user.id}`;
+    return localStorage.getItem(latestConnectionKey);
+  }
 }
