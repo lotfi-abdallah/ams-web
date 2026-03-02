@@ -37,18 +37,15 @@ export class Login {
 
     this.api.post('auth/login', { email, password }).subscribe({
       next: (response: any) => {
-        // Set user temporarily so getLatestConnection/saveLatestConnection can use the id
         const user = response.user as User;
-        this.auth.setUser(response.user);
-        const lastCnx = this.auth.getLatestConnection();
-        this.auth.saveLatestConnection();
+        const lastCnx = this.auth.getLatestConnection(user.id);
+        this.auth.saveLatestConnection(user.id);
 
         const lastCnxMsg = lastCnx
           ? `Dernière connexion : ${new Date(lastCnx).toLocaleString('fr-FR')}`
           : 'Première connexion !';
         this.notification.success(lastCnxMsg, 'Connexion réussie, Bienvenue ' + user.nom + ' !');
 
-        // Fetch full user data (overrides the partial object set above)
         this.auth.fetchCurrentUser();
         this.router.navigate(['/']);
       },

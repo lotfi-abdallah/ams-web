@@ -34,21 +34,11 @@ export class AuthService {
     });
   }
 
-  saveLatestConnection() {
-    const user = this._user();
-    if (user != null) {
-      const latestConnectionKey = `latestConnection_${user.id}`;
-      localStorage.setItem(latestConnectionKey, new Date().toISOString());
-    }
+  saveLatestConnection(id: number) {
+    localStorage.setItem(`latestConnection_${id}`, new Date().toISOString());
   }
 
-  getLatestConnection(): string | null {
-    const user = this._user();
-    if (!user) {
-      return null;
-    }
-
-    const latestConnectionKey = `latestConnection_${user.id}`;
-    return localStorage.getItem(latestConnectionKey);
+  getLatestConnection(id: number): string | null {
+    return localStorage.getItem(`latestConnection_${id}`);
   }
 }
