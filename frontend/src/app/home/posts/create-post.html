@@ -1,39 +1,54 @@
-<section class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-  <h2 class="text-lg font-semibold text-gray-900 mb-3">Create Post</h2>
+<section class="relative bg-hn-surface rounded border border-hn-border p-4 overflow-hidden">
+  <h2 class="text-lg font-semibold text-hn-text mb-3">Creer un post</h2>
 
-  <form (submit)="submitPost($event)" class="space-y-3">
+  @if (!isLoggedIn()) {
+    <div
+      class="absolute inset-0 z-10 bg-hn-bg-80 backdrop-blur-[1px] flex items-center justify-center px-4"
+    >
+      <p class="text-sm md:text-base font-medium text-hn-text text-center">
+        Veuillez vous connecter pour publier.
+      </p>
+    </div>
+  }
+
+  <form
+    (submit)="submitPost($event)"
+    class="space-y-3 transition"
+    [class.blur-sm]="!isLoggedIn()"
+    [class.pointer-events-none]="!isLoggedIn()"
+  >
     <div>
-      <label for="postText" class="block text-sm font-medium text-gray-700 mb-1">Text</label>
+      <label for="postText" class="block text-sm font-medium text-hn-text mb-1">Texte</label>
       <textarea
         id="postText"
         name="postText"
         [(ngModel)]="texte"
         rows="4"
-        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="What's happening?"
+        class="w-full rounded border border-hn-border bg-hn-bg px-3 py-2 text-sm text-hn-text focus:outline-none focus:ring-2 focus:ring-hn-orange"
+        placeholder="Que se passe-t-il ?"
       ></textarea>
     </div>
 
     <div>
-      <label for="postImage" class="block text-sm font-medium text-gray-700 mb-1"
-        >Image URL (optional)</label
+      <label for="postImage" class="block text-sm font-medium text-hn-text mb-1"
+        >URL de l'image (optionnel)</label
       >
       <input
         id="postImage"
         name="postImage"
         [(ngModel)]="image"
         type="text"
-        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="w-full rounded border border-hn-border bg-hn-bg px-3 py-2 text-sm text-hn-text focus:outline-none focus:ring-2 focus:ring-hn-orange"
         placeholder="/uploads/filename.jpeg"
       />
     </div>
 
     <button
       type="submit"
-      [disabled]="isSubmitting"
-      class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+      [disabled]="isSubmitting || !isLoggedIn()"
+      class="inline-flex items-center justify-center rounded bg-hn-orange px-4 py-2 text-sm font-medium text-hn-text hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {{ isSubmitting ? 'Publishing...' : 'Publish' }}
+      {{ isSubmitting ? 'Publication...' : 'Publier' }}
     </button>
   </form>
 </section>

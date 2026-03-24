@@ -1,1 +1,77 @@
-<h1>my post view</h1>
+<article class="bg-hn-surface rounded border border-hn-border p-4 my-4">
+  <header class="flex items-center justify-between gap-3 mb-3">
+    <div class="flex items-center gap-2 min-w-0">
+      <div
+        class="w-8 h-8 rounded-full bg-hn-bg text-hn-muted flex items-center justify-center text-xs font-semibold shrink-0 border border-hn-border"
+      >
+        {{ post().auteur.charAt(0).toUpperCase() }}
+      </div>
+      <p class="font-semibold text-hn-text truncate">{{ post().auteur }}</p>
+      @if (isWrapped()) {
+        <div class="text-xs text-hn-muted flex items-center gap-3 whitespace-nowrap">
+          <span class="inline-flex items-center gap-1">
+            <svg [lucideIcon]="heartIcon" class="w-3.5 h-3.5"></svg>
+            <span>{{ post().likes.length }}</span>
+          </span>
+          <span class="inline-flex items-center gap-1">
+            <svg [lucideIcon]="commentIcon" class="w-3.5 h-3.5"></svg>
+            <span>{{ post().commentaires.length }}</span>
+          </span>
+        </div>
+      }
+    </div>
+    <div class="flex items-center gap-2">
+      <p class="text-xs text-hn-muted whitespace-nowrap">{{ post().date | date: 'short' }}</p>
+      <button
+        type="button"
+        (click)="toggleWrap()"
+        [attr.aria-label]="isWrapped() ? 'Deplier la publication' : 'Replier la publication'"
+        [attr.title]="isWrapped() ? 'Deplier' : 'Replier'"
+        class="w-7 h-7 rounded border border-hn-border text-hn-muted hover:text-hn-text bg-hn-surface inline-flex items-center justify-center"
+      >
+        <svg
+          [lucideIcon]="chevronIcon"
+          class="w-4 h-4 transition-transform"
+          [class.rotate-180]="!isWrapped()"
+        ></svg>
+      </button>
+    </div>
+  </header>
+
+  @if (!isWrapped()) {
+    <p class="text-sm text-hn-text whitespace-pre-wrap mb-3">{{ post().texte }}</p>
+
+    @if (post().image) {
+      <img
+        [src]="post().image"
+        alt="Image de la publication"
+        class="w-full max-h-96 object-cover rounded border border-hn-border mb-3"
+      />
+    }
+
+    @if (post().tags?.length) {
+      <div class="flex flex-wrap gap-2 mb-3">
+        @for (tag of post().tags; track tag) {
+          <span
+            class="px-2 py-1 text-xs rounded-full bg-hn-bg text-hn-muted border border-hn-border"
+          >
+            #{{ tag }}
+          </span>
+        }
+      </div>
+    }
+  }
+
+  @if (!isWrapped()) {
+    <footer class="text-xs text-hn-muted flex items-center gap-4">
+      <span class="inline-flex items-center gap-1.5">
+        <svg [lucideIcon]="heartIcon" class="w-3.5 h-3.5"></svg>
+        <span>{{ post().likes.length }}</span>
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <svg [lucideIcon]="commentIcon" class="w-3.5 h-3.5"></svg>
+        <span>{{ post().commentaires.length }}</span>
+      </span>
+    </footer>
+  }
+</article>

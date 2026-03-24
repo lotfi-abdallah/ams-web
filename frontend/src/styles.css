@@ -1,3 +1,54 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import "tailwindcss";
+@import 'tailwindcss';
+
+:root {
+  --hn-orange: #ff6600;
+  --hn-bg: #f6f6ef;
+  --hn-surface: #ffffff;
+  --hn-text: #000000;
+  --hn-muted: #828282;
+  --hn-border: #e6e6df;
+}
+
+@layer base {
+  body {
+    background-color: var(--hn-bg);
+    color: var(--hn-text);
+    font-family: Verdana, Geneva, sans-serif;
+  }
+}
+
+@layer utilities {
+  .bg-hn-orange {
+    background-color: var(--hn-orange);
+  }
+
+  .bg-hn-bg {
+    background-color: var(--hn-bg);
+  }
+
+  .bg-hn-bg-80 {
+    background-color: color-mix(in srgb, var(--hn-bg) 80%, transparent);
+  }
+
+  .bg-hn-surface {
+    background-color: var(--hn-surface);
+  }
+
+  .text-hn-text {
+    color: var(--hn-text);
+  }
+
+  .text-hn-muted {
+    color: var(--hn-muted);
+  }
+
+  .border-hn-border {
+    border-color: var(--hn-border);
+  }
+
+  .ring-hn-orange {
+    --tw-ring-color: var(--hn-orange);
+  }
+}

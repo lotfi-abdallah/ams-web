@@ -1,16 +1,35 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
-import { Observable } from 'rxjs';
+import { map, Observable, Subject } from 'rxjs';
 import { Post } from '../models';
+
+export interface PaginatedPostsResponse {
+  data: Post[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalPosts: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class PostsService {
+  private refreshTimelineSubject = new Subject<void>();
+  refreshTimeline$ = this.refreshTimelineSubject.asObservable();
+
   constructor(private api: ApiService) {}
 
+  getPostsPage(page: number, limit: number): Observable<PaginatedPostsResponse> {
+    return this.api.get<PaginatedPostsResponse>(`posts?page=${page}&limit=${limit}`);
+  }
+
   getPosts(page: number, limit: number): Observable<Post[]> {
-    return this.api.get<Post[]>(`posts?page=${page}&limit=${limit}`);
+    return this.getPostsPage(page, limit).pipe(map((response) => response.data));
   }
 
   getPost(postId: string): Observable<Post> {
@@ -35,5 +54,9 @@ export class PostsService {
 
   deleteComment(postId: string, commentId: string): Observable<void> {
     return this.api.delete<void>(`posts/${postId}/comment/${commentId}`);
+  }
+
+  notifyTimelineRefresh() {
+    this.refreshTimelineSubject.next();
   }
 }

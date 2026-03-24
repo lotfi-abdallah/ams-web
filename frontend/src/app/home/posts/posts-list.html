@@ -1,2 +1,43 @@
-<h1>posts list</h1>
-<app-post />
+<section class="space-y-3 mt-4">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-semibold text-hn-text">Publications</h2>
+    <button
+      type="button"
+      (click)="reloadPosts()"
+      [disabled]="isLoading() || isLoadingMore()"
+      class="text-sm px-3 py-1.5 rounded border border-hn-border bg-hn-surface text-hn-muted hover:text-hn-text"
+    >
+      Actualiser
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <p class="text-sm text-hn-muted">Chargement des posts...</p>
+  } @else if (errorMessage()) {
+    <p class="text-sm text-red-600">{{ errorMessage() }}</p>
+  } @else if (posts().length === 0) {
+    <p class="text-sm text-hn-muted">Aucun post pour le moment.</p>
+  } @else {
+    <div class="space-y-4">
+      @for (post of posts(); track post._id) {
+        <app-post [post]="post" />
+      }
+    </div>
+
+    @if (hasNextPage()) {
+      <div class="pt-2 flex justify-center">
+        <button
+          type="button"
+          (click)="loadMorePosts()"
+          [disabled]="isLoadingMore()"
+          class="text-sm px-4 py-2 rounded border border-hn-border bg-hn-surface text-hn-muted hover:text-hn-text disabled:cursor-not-allowed disabled:opacity-60 mt-4 mb-2"
+        >
+          {{ isLoadingMore() ? 'Chargement...' : 'Charger plus' }}
+        </button>
+      </div>
+    }
+    @if (!hasNextPage() && posts().length > 0) {
+      <p class="text-sm text-hn-muted text-center mt-4 mb-2">Vous avez atteint la fin des posts.</p>
+    }
+  }
+</section>

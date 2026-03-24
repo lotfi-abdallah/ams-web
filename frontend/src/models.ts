@@ -23,4 +23,5 @@ export interface Post {
   image: string;
   date: Date;
   commentaires: Comment[];
+  tags?: string[];
 }

@@ -14,6 +14,7 @@ interface IPost extends Document {
   image: string;
   date: Date;
   commentaires: Comment[];
+  tags?: string[];
 }
 
 const commentSchema = new Schema<Comment>({
@@ -30,6 +31,7 @@ const postSchema = new Schema<IPost>(
     image: String,
     date: { type: Date, default: Date.now },
     commentaires: [commentSchema],
+    tags: { type: [String], default: [] },
   },
   { timestamps: false },
 );
