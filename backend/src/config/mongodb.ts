@@ -1,6 +1,20 @@
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
+import mongoose from "mongoose";
 import { env } from "./env";
+
+export async function connectMongoDB() {
+  try {
+    const uri = env.mongodb.uri.endsWith("/")
+      ? env.mongodb.uri
+      : `${env.mongodb.uri}/`;
+    await mongoose.connect(`${uri}${env.mongodb.database}`);
+    console.log("✅ MongoDB connected successfully through Mongoose");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error);
+    process.exit(1);
+  }
+}
 
 export function createMongoSessionStore() {
   const store = new MongoDBStore({

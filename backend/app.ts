@@ -1,6 +1,7 @@
 import express from "express";
 import { errorHandler } from "./src/middlewares/error.middleware";
 import authRoutes from "./src/modules/auth/auth.routes";
+import postRoutes from "./src/modules/posts/posts.routes";
 import { createMongoSessionStore, session } from "./src/config/mongodb";
 import { env } from "./src/config/env";
 
@@ -37,6 +38,7 @@ app.use(express.json());
 // app.use("/", homeRoutes);
 // app.use("/", authRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/posts", postRoutes);
 
 app.use(express.static("../frontend/dist/frontend/browser"));
 app.get("/*rest", (req, res) => {

@@ -29,7 +29,11 @@ export const loginUser = async (req: Request, res: Response) => {
         .json({ message: "Failed to update connection status" });
     }
 
-    req.session.user = { id: user.id, mail: user.mail };
+    req.session.user = {
+      id: user.id,
+      email: user.mail,
+      username: user.pseudo,
+    };
 
     return res.status(200).json({
       message: "Login successful",
