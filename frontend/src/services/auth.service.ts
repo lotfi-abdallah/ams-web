@@ -1,16 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { ApiService } from './api.service';
 import { tap } from 'rxjs';
-
-export interface User {
-  id: number;
-  mail: string;
-  pseudo: string;
-  nom: string;
-  prenom: string;
-  avatar: string;
-  statut_connexion: number;
-}
+import { User } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

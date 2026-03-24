@@ -3,8 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { form } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
-import { AuthService, User } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
+import { User } from '../../models';
 
 interface LoginData {
   email: string;

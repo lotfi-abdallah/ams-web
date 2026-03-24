@@ -63,16 +63,32 @@ export const getPostById = async (req: Request, res: Response) => {
 /**
  * @route POST /api/posts
  * Créer un nouveau post
- * - title: titre du post (obligatoire)
- * - content: contenu du post (obligatoire)
+ * - texte: contenu du post (obligatoire)
+ * - image: image du post (optionnel)
  *
  * Réponse: Détails du post créé ou message d'erreur en cas de problème lors de la création
  */
 export const createPost = async (req: Request, res: Response) => {
   try {
-    const { title, content, author } = req.body;
+    const { texte, image } = req.body;
+    const userName = req.session.user?.username;
 
-    const newPost = new Post({ title, content, author });
+    if (!userName) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    if (!texte || typeof texte !== "string" || !texte.trim()) {
+      return res.status(400).json({ message: "texte is required" });
+    }
+
+    const newPost = new Post({
+      auteur: userName,
+      texte: texte.trim(),
+      image: typeof image === "string" ? image.trim() : "",
+      likes: [],
+      commentaires: [],
+      date: new Date(),
+    });
     const savedPost = await newPost.save();
 
     res.status(201).json(savedPost);
