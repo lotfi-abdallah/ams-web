@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, effect, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export interface PostFiltersFormValue {
@@ -15,6 +15,9 @@ export interface PostFiltersFormValue {
 export class PostFiltersPanel {
   isLoading = input.required<boolean>();
   isLoadingMore = input.required<boolean>();
+  tags = input('');
+  from = input('');
+  to = input('');
 
   applyFilters = output<PostFiltersFormValue>();
   clearFilters = output<void>();
@@ -22,6 +25,14 @@ export class PostFiltersPanel {
   tagsFilter = '';
   fromFilter = '';
   toFilter = '';
+
+  constructor() {
+    effect(() => {
+      this.tagsFilter = this.tags();
+      this.fromFilter = this.from();
+      this.toFilter = this.to();
+    });
+  }
 
   onSubmit(event: Event) {
     event.preventDefault();

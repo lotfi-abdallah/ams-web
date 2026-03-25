@@ -1,5 +1,6 @@
 import { Component, DestroyRef, HostListener, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Post as PostModel } from '../../../models';
 import { PostFilters, PostsService } from '../../../services/posts.service';
 import { PostCard } from './post';
@@ -26,10 +27,19 @@ export class PostsList implements OnInit {
 
   private destroyRef = inject(DestroyRef);
 
-  constructor(private postsService: PostsService) {}
+  constructor(
+    private postsService: PostsService,
+    private route: ActivatedRoute,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
-    this.reloadPosts();
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((queryParams) => {
+      this.activeTagsFilter = queryParams.get('tags') ?? '';
+      this.activeFromFilter = queryParams.get('from') ?? '';
+      this.activeToFilter = queryParams.get('to') ?? '';
+      this.reloadPosts();
+    });
 
     this.postsService.refreshTimeline$
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -102,17 +112,57 @@ export class PostsList implements OnInit {
   }
 
   onApplyFilters(filters: PostFiltersFormValue) {
-    this.activeTagsFilter = filters.tags;
-    this.activeFromFilter = filters.from;
-    this.activeToFilter = filters.to;
-    this.reloadPosts();
+    const normalizedTags = filters.tags
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+
+    const normalizedTagsValue =
+      normalizedTags.length > 0 ? [...new Set(normalizedTags)].join(',') : null;
+    const normalizedFrom = filters.from.trim() || null;
+    const normalizedTo = filters.to.trim() || null;
+
+    const currentTags = this.route.snapshot.queryParamMap.get('tags');
+    const currentFrom = this.route.snapshot.queryParamMap.get('from');
+    const currentTo = this.route.snapshot.queryParamMap.get('to');
+
+    if (
+      currentTags === normalizedTagsValue &&
+      currentFrom === normalizedFrom &&
+      currentTo === normalizedTo
+    ) {
+      return;
+    }
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        tags: normalizedTagsValue,
+        from: normalizedFrom,
+        to: normalizedTo,
+      },
+      queryParamsHandling: 'merge',
+    });
   }
 
   onClearFilters() {
-    this.activeTagsFilter = '';
-    this.activeFromFilter = '';
-    this.activeToFilter = '';
-    this.reloadPosts();
+    const currentTags = this.route.snapshot.queryParamMap.get('tags');
+    const currentFrom = this.route.snapshot.queryParamMap.get('from');
+    const currentTo = this.route.snapshot.queryParamMap.get('to');
+
+    if (!currentTags && !currentFrom && !currentTo) {
+      return;
+    }
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        tags: null,
+        from: null,
+        to: null,
+      },
+      queryParamsHandling: 'merge',
+    });
   }
 
   private getCurrentFilters(): PostFilters {
