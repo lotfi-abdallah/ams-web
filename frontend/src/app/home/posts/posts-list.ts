@@ -10,7 +10,7 @@ import { PostCard } from './post';
   templateUrl: './posts-list.html',
 })
 export class PostsList implements OnInit {
-  readonly autoLoadEnabled = false;
+  readonly autoLoadEnabled = true;
   readonly postsPerPage = 5;
 
   posts = signal<PostModel[]>([]);

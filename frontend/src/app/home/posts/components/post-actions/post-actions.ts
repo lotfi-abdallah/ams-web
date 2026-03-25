@@ -11,12 +11,18 @@ export class PostActions {
   post = input.required<PostModel>();
   isLikeLoading = input.required<boolean>();
   isLikedByCurrentUser = input.required<boolean>();
+  isCommentsOpen = input.required<boolean>();
   toggleLike = output<void>();
+  toggleComments = output<void>();
 
   readonly heartIcon = LucideHeart;
   readonly commentIcon = LucideMessageCircle;
 
   onToggleLike() {
     this.toggleLike.emit();
+  }
+
+  onToggleComments() {
+    this.toggleComments.emit();
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, EMPTY, catchError, throwError } from 'rxjs';
+import { Observable, EMPTY, catchError, map, throwError } from 'rxjs';
 import { Post as PostModel } from '../../../../models';
 import { AuthService } from '../../../../services/auth.service';
 import { NotificationService } from '../../../../services/notification.service';
@@ -23,6 +23,15 @@ export class PostInteractionFacade {
     }
 
     return post.likes.includes(userName);
+  }
+
+  getCurrentUserNameValue(): string | null {
+    return this.getCurrentUserName();
+  }
+
+  canDeleteComment(commentAuthor: string): boolean {
+    const userName = this.getCurrentUserName();
+    return !!userName && userName === commentAuthor;
   }
 
   toggleLike(post: PostModel): Observable<void> {
@@ -52,6 +61,52 @@ export class PostInteractionFacade {
       catchError((error) => {
         post.likes = previousLikes;
         this.notification.error("Impossible de mettre a jour le j'aime.");
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  addComment(post: PostModel, texte: string): Observable<void> {
+    const postId = post._id;
+    if (!postId) {
+      return EMPTY;
+    }
+
+    const userName = this.getCurrentUserName();
+    if (!userName) {
+      this.notification.error('Veuillez vous connecter pour commenter une publication.');
+      return EMPTY;
+    }
+
+    const trimmedText = texte.trim();
+    if (!trimmedText) {
+      this.notification.error('Le commentaire ne peut pas etre vide.');
+      return EMPTY;
+    }
+
+    return this.postsService.addComment(postId, { texte: trimmedText }).pipe(
+      map((updatedPost: PostModel) => {
+        post.commentaires = updatedPost.commentaires;
+      }),
+      catchError((error) => {
+        this.notification.error("Impossible d'ajouter le commentaire.");
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  deleteComment(post: PostModel, commentId: string): Observable<void> {
+    const postId = post._id;
+    if (!postId || !commentId) {
+      return EMPTY;
+    }
+
+    return this.postsService.deleteComment(postId, commentId).pipe(
+      map((updatedPost: PostModel) => {
+        post.commentaires = updatedPost.commentaires;
+      }),
+      catchError((error) => {
+        this.notification.error('Impossible de supprimer le commentaire.');
         return throwError(() => error);
       }),
     );

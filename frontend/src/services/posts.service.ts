@@ -48,12 +48,16 @@ export class PostsService {
     return this.api.post<void>(`posts/${postId}/unlike`, {});
   }
 
-  addComment(postId: string, commentData: { texte: string }): Observable<void> {
-    return this.api.post<void>(`posts/${postId}/comment`, commentData);
+  addComment(postId: string, commentData: { texte: string }): Observable<Post> {
+    return this.api
+      .post<{ post: Post }>(`posts/${postId}/comment`, commentData)
+      .pipe(map((response) => response.post));
   }
 
-  deleteComment(postId: string, commentId: string): Observable<void> {
-    return this.api.delete<void>(`posts/${postId}/comment/${commentId}`);
+  deleteComment(postId: string, commentId: string): Observable<Post> {
+    return this.api
+      .delete<{ post: Post }>(`posts/${postId}/comment/${commentId}`)
+      .pipe(map((response) => response.post));
   }
 
   notifyTimelineRefresh() {

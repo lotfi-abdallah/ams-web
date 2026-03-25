@@ -13,7 +13,22 @@
       [post]="post()"
       [isLikeLoading]="isLikeLoading()"
       [isLikedByCurrentUser]="isLikedByCurrentUser()"
+      [isCommentsOpen]="isCommentsOpen()"
       (toggleLike)="toggleLike()"
+      (toggleComments)="toggleComments()"
     />
+
+    @if (isCommentsOpen()) {
+      <app-post-comments
+        [post]="post()"
+        [currentUserName]="currentUserName()"
+        [commentDraft]="commentDraft()"
+        [isCommentSubmitting]="isCommentSubmitting()"
+        [deletingCommentIds]="deletingCommentIds()"
+        (commentDraftChange)="updateCommentDraft($event)"
+        (submitComment)="submitComment()"
+        (deleteComment)="deleteComment($event)"
+      />
+    }
   }
 </article>
