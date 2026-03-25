@@ -1,12 +1,15 @@
 <section class="relative bg-hn-surface rounded border border-hn-border p-4 overflow-hidden">
-  <h2 class="text-lg font-semibold text-hn-text mb-3">Creer un post</h2>
+  <h2 class="text-lg font-semibold text-hn-text mb-3">Créer un post</h2>
 
   @if (!isLoggedIn()) {
     <div
       class="absolute inset-0 z-10 bg-hn-bg-80 backdrop-blur-[1px] flex items-center justify-center px-4"
     >
       <p class="text-sm md:text-base font-medium text-hn-text text-center">
-        Veuillez vous connecter pour publier.
+        <a href="/login" class="text-hn-orange hover:brightness-95 underline"
+          >Veuillez vous connecter</a
+        >
+        pour publier.
       </p>
     </div>
   }
@@ -18,7 +21,9 @@
     [class.pointer-events-none]="!isLoggedIn()"
   >
     <div>
-      <label for="postText" class="block text-sm font-medium text-hn-text mb-1">Texte</label>
+      <label for="postText" class="block text-sm font-medium text-hn-text mb-1"
+        >Texte<b>*</b></label
+      >
       <textarea
         id="postText"
         name="postText"
@@ -31,7 +36,7 @@
 
     <div>
       <label for="postImage" class="block text-sm font-medium text-hn-text mb-1"
-        >URL de l'image (optionnel)</label
+        >Image <b>( TODO )</b></label
       >
       <input
         id="postImage"

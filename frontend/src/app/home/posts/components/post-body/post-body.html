@@ -1,0 +1,19 @@
+<p class="text-sm text-hn-text whitespace-pre-wrap mb-3">{{ post().texte }}</p>
+
+@if (post().image) {
+  <img
+    [src]="post().image"
+    alt="Image de la publication"
+    class="w-full max-h-96 object-cover rounded border border-hn-border mb-3"
+  />
+}
+
+@if (post().tags?.length) {
+  <div class="flex flex-wrap gap-2 mb-3">
+    @for (tag of post().tags; track tag) {
+      <span class="px-2 py-1 text-xs rounded-full bg-hn-bg text-hn-muted border border-hn-border">
+        #{{ tag }}
+      </span>
+    }
+  </div>
+}
