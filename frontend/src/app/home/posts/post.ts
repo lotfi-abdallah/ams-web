@@ -18,9 +18,6 @@ export class PostCard {
   isWrapped = signal(false);
   isLikeLoading = signal(false);
   isCommentsOpen = signal(false);
-  commentDraft = signal('');
-  isCommentSubmitting = signal(false);
-  deletingCommentIds = signal<string[]>([]);
 
   constructor(
     private postInteraction: PostInteractionFacade,
@@ -33,14 +30,6 @@ export class PostCard {
 
   toggleComments() {
     this.isCommentsOpen.update((value) => !value);
-  }
-
-  updateCommentDraft(value: string) {
-    this.commentDraft.set(value);
-  }
-
-  currentUserName() {
-    return this.postInteraction.getCurrentUserNameValue();
   }
 
   isLikedByCurrentUser() {
@@ -62,45 +51,6 @@ export class PostCard {
           // error message
           this.notification.error("Impossible de mettre a jour le j'aime.");
         },
-      });
-  }
-
-  submitComment() {
-    const commentText = this.commentDraft().trim();
-    if (!commentText || this.isCommentSubmitting()) {
-      return;
-    }
-
-    this.isCommentSubmitting.set(true);
-
-    this.postInteraction
-      .addComment(this.post(), commentText)
-      .pipe(finalize(() => this.isCommentSubmitting.set(false)))
-      .subscribe({
-        next: () => {
-          this.commentDraft.set('');
-          this.isCommentsOpen.set(true);
-        },
-        error: () => {},
-      });
-  }
-
-  deleteComment(commentId: string) {
-    if (!commentId || this.deletingCommentIds().includes(commentId)) {
-      return;
-    }
-
-    this.deletingCommentIds.update((ids) => [...ids, commentId]);
-
-    this.postInteraction
-      .deleteComment(this.post(), commentId)
-      .pipe(
-        finalize(() => {
-          this.deletingCommentIds.update((ids) => ids.filter((id) => id !== commentId));
-        }),
-      )
-      .subscribe({
-        error: () => {},
       });
   }
 }

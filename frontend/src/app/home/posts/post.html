@@ -19,16 +19,7 @@
     />
 
     @if (isCommentsOpen()) {
-      <app-post-comments
-        [post]="post()"
-        [currentUserName]="currentUserName()"
-        [commentDraft]="commentDraft()"
-        [isCommentSubmitting]="isCommentSubmitting()"
-        [deletingCommentIds]="deletingCommentIds()"
-        (commentDraftChange)="updateCommentDraft($event)"
-        (submitComment)="submitComment()"
-        (deleteComment)="deleteComment($event)"
-      />
+      <app-post-comments [post]="post()" />
     }
   }
 </article>
