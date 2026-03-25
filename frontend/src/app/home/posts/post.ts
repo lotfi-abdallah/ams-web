@@ -1,4 +1,4 @@
-import { Component, input, signal } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { Post as PostModel } from '../../../models';
 import { finalize } from 'rxjs';
 import { PostInteractionFacade } from './state/post-interaction.facade';
@@ -15,6 +15,7 @@ import { NotificationService } from '../../../services/notification.service';
 })
 export class PostCard {
   post = input.required<PostModel>();
+  tagClick = output<string>();
   isWrapped = signal(false);
   isLikeLoading = signal(false);
   isCommentsOpen = signal(false);
@@ -37,6 +38,10 @@ export class PostCard {
 
   updateCommentDraft(value: string) {
     this.commentDraft.set(value);
+  }
+
+  onTagClick(tag: string) {
+    this.tagClick.emit(tag);
   }
 
   currentUserName() {

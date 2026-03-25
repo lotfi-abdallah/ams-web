@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { Post as PostModel } from '../../../../../models';
 
 @Component({
@@ -7,4 +7,9 @@ import { Post as PostModel } from '../../../../../models';
 })
 export class PostBody {
   post = input.required<PostModel>();
+  tagClick = output<string>();
+
+  onTagClick(tag: string) {
+    this.tagClick.emit(tag);
+  }
 }

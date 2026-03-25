@@ -6,8 +6,9 @@
       @for (comment of post().commentaires; track comment._id ?? comment.date) {
         <article class="rounded border border-hn-border bg-hn-bg p-2.5">
           <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0">
+            <div class="min-w-0 flex">
               <p class="text-xs text-hn-text font-semibold">{{ comment.auteur }}</p>
+              <span class="mx-1 text-xs text-hn-muted"> - </span>
               <p class="text-xs text-hn-muted">{{ comment.date | date: 'short' }}</p>
             </div>
 

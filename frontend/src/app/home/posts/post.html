@@ -7,7 +7,7 @@
   />
 
   @if (!isWrapped()) {
-    <app-post-body [post]="post()" />
+    <app-post-body [post]="post()" (tagClick)="onTagClick($event)" />
 
     <app-post-actions
       [post]="post()"

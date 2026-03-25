@@ -165,6 +165,33 @@ export class PostsList implements OnInit {
     });
   }
 
+  onTagClick(tag: string) {
+    const clickedTag = tag.trim();
+    if (!clickedTag) {
+      return;
+    }
+
+    const currentTags = (this.route.snapshot.queryParamMap.get('tags') ?? '')
+      .split(',')
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0);
+
+    const mergedTags = [...new Set([...currentTags, clickedTag])];
+    const nextTags = mergedTags.join(',');
+
+    if (nextTags === (this.route.snapshot.queryParamMap.get('tags') ?? '')) {
+      return;
+    }
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        tags: nextTags,
+      },
+      queryParamsHandling: 'merge',
+    });
+  }
+
   private getCurrentFilters(): PostFilters {
     const tags = this.activeTagsFilter
       .split(',')

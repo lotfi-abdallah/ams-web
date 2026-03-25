@@ -30,7 +30,7 @@
   } @else {
     <div class="space-y-4">
       @for (post of posts(); track post._id) {
-        <app-post [post]="post" />
+        <app-post [post]="post" (tagClick)="onTagClick($event)" />
       }
     </div>
 
