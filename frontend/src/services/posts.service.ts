@@ -36,7 +36,7 @@ export class PostsService {
     return this.api.get<Post>(`posts/${postId}`);
   }
 
-  createPost(postData: { texte: string; image?: string }): Observable<Post> {
+  createPost(postData: { texte: string; image?: string; tags?: string[] }): Observable<Post> {
     return this.api.post<Post>('posts', postData);
   }
 

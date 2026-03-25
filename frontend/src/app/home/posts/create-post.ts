@@ -12,6 +12,7 @@ import { AuthService } from '../../../services/auth.service';
 export class CreatePost {
   texte = '';
   image = '';
+  tags = '';
   isSubmitting = false;
 
   constructor(
@@ -34,6 +35,11 @@ export class CreatePost {
 
     const trimmedText = this.texte.trim();
     const trimmedImage = this.image.trim();
+    const normalizedTags = this.tags
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+    const uniqueTags = [...new Set(normalizedTags)];
 
     if (!trimmedText) {
       this.notification.error('Le texte du post est obligatoire.');
@@ -46,11 +52,13 @@ export class CreatePost {
       .createPost({
         texte: trimmedText,
         image: trimmedImage || undefined,
+        tags: uniqueTags,
       })
       .subscribe({
         next: () => {
           this.texte = '';
           this.image = '';
+          this.tags = '';
           this.postsService.notifyTimelineRefresh();
           this.notification.success('Post publié avec succès.');
           this.isSubmitting = false;
