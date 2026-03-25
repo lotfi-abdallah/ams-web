@@ -1,7 +1,6 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
 
+/* Définition des variables de couleur pour le thème HN */
 :root {
   --hn-orange: #ff6600;
   --hn-bg: #f6f6ef;
@@ -10,7 +9,7 @@
   --hn-muted: #828282;
   --hn-border: #e6e6df;
 }
-
+/* Styles de base pour le thème HN */
 @layer base {
   body {
     background-color: var(--hn-bg);
@@ -18,7 +17,7 @@
     font-family: Verdana, Geneva, sans-serif;
   }
 }
-
+/* Utilitaires personnalisés pour le thème HN */
 @layer utilities {
   .bg-hn-orange {
     background-color: var(--hn-orange);
@@ -51,4 +50,50 @@
   .ring-hn-orange {
     --tw-ring-color: var(--hn-orange);
   }
+}
+
+/* Hacker News toastr style adapté au thème HN */
+.toast-container .ngx-toastr {
+  width: 340px;
+  border: 1px solid var(--hn-border);
+  border-left-width: 4px;
+  border-radius: 4px;
+  box-shadow: none;
+  background-image: none;
+  color: var(--hn-text);
+  background-color: var(--hn-surface);
+  padding: 12px 14px;
+  font-family: Verdana, Geneva, sans-serif;
+}
+
+.toast-container .toast-success {
+  border-left-color: var(--hn-orange);
+}
+
+.toast-container .toast-error {
+  border-left-color: var(--hn-muted);
+}
+
+.toast-container .toast-title {
+  font-weight: 700;
+  color: var(--hn-text);
+}
+
+.toast-container .toast-message {
+  color: var(--hn-muted);
+}
+
+.toast-container .ngx-toastr .toast-progress {
+  background-color: var(--hn-orange);
+  opacity: 1;
+}
+
+.toast-container .ngx-toastr .toast-close-button {
+  color: var(--hn-muted);
+  opacity: 1;
+  text-shadow: none;
+}
+
+.toast-container .ngx-toastr .toast-close-button:hover {
+  color: var(--hn-text);
 }
