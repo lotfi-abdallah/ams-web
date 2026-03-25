@@ -11,6 +11,13 @@
     </button>
   </div>
 
+  <app-post-filters
+    [isLoading]="isLoading()"
+    [isLoadingMore]="isLoadingMore()"
+    (applyFilters)="onApplyFilters($event)"
+    (clearFilters)="onClearFilters()"
+  />
+
   @if (isLoading()) {
     <p class="text-sm text-hn-muted">Chargement des posts...</p>
   } @else if (errorMessage()) {

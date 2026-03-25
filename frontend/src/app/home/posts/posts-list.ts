@@ -1,12 +1,13 @@
 import { Component, DestroyRef, HostListener, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Post as PostModel } from '../../../models';
-import { PostsService } from '../../../services/posts.service';
+import { PostFilters, PostsService } from '../../../services/posts.service';
 import { PostCard } from './post';
+import { PostFiltersFormValue, PostFiltersPanel } from './components/post-filters/post-filters';
 
 @Component({
   selector: 'app-posts-list',
-  imports: [PostCard],
+  imports: [PostFiltersPanel, PostCard],
   templateUrl: './posts-list.html',
 })
 export class PostsList implements OnInit {
@@ -19,6 +20,9 @@ export class PostsList implements OnInit {
   errorMessage = signal('');
   hasNextPage = signal(true);
   currentPage = signal(1);
+  activeTagsFilter = '';
+  activeFromFilter = '';
+  activeToFilter = '';
 
   private destroyRef = inject(DestroyRef);
 
@@ -57,7 +61,7 @@ export class PostsList implements OnInit {
     this.currentPage.set(1);
     this.hasNextPage.set(true);
 
-    this.postsService.getPostsPage(1, this.postsPerPage).subscribe({
+    this.postsService.getPostsPage(1, this.postsPerPage, this.getCurrentFilters()).subscribe({
       next: (response) => {
         this.posts.set(response.data);
         this.currentPage.set(response.pagination.page);
@@ -81,17 +85,46 @@ export class PostsList implements OnInit {
 
     const nextPage = this.currentPage() + 1;
 
-    this.postsService.getPostsPage(nextPage, this.postsPerPage).subscribe({
-      next: (response) => {
-        this.posts.update((currentPosts) => [...currentPosts, ...response.data]);
-        this.currentPage.set(response.pagination.page);
-        this.hasNextPage.set(response.pagination.hasNextPage);
-        this.isLoadingMore.set(false);
-      },
-      error: () => {
-        this.errorMessage.set('Impossible de charger plus de posts pour le moment.');
-        this.isLoadingMore.set(false);
-      },
-    });
+    this.postsService
+      .getPostsPage(nextPage, this.postsPerPage, this.getCurrentFilters())
+      .subscribe({
+        next: (response) => {
+          this.posts.update((currentPosts) => [...currentPosts, ...response.data]);
+          this.currentPage.set(response.pagination.page);
+          this.hasNextPage.set(response.pagination.hasNextPage);
+          this.isLoadingMore.set(false);
+        },
+        error: () => {
+          this.errorMessage.set('Impossible de charger plus de posts pour le moment.');
+          this.isLoadingMore.set(false);
+        },
+      });
+  }
+
+  onApplyFilters(filters: PostFiltersFormValue) {
+    this.activeTagsFilter = filters.tags;
+    this.activeFromFilter = filters.from;
+    this.activeToFilter = filters.to;
+    this.reloadPosts();
+  }
+
+  onClearFilters() {
+    this.activeTagsFilter = '';
+    this.activeFromFilter = '';
+    this.activeToFilter = '';
+    this.reloadPosts();
+  }
+
+  private getCurrentFilters(): PostFilters {
+    const tags = this.activeTagsFilter
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+
+    return {
+      tags: tags.length ? [...new Set(tags)] : undefined,
+      from: this.activeFromFilter || undefined,
+      to: this.activeToFilter || undefined,
+    };
   }
 }

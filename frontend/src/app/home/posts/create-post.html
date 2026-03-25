@@ -64,7 +64,7 @@
     <button
       type="submit"
       [disabled]="isSubmitting || !isLoggedIn()"
-      class="inline-flex items-center justify-center rounded bg-hn-orange px-4 py-2 text-sm font-medium text-hn-text hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+      class="inline-flex items-center justify-center rounded bg-hn-orange px-4 py-2 text-sm font-medium text-hn-text hover:brightness-95 disabled:cursor-not-allowed cursor-pointer disabled:opacity-60"
     >
       {{ isSubmitting ? 'Publication...' : 'Publier' }}
     </button>

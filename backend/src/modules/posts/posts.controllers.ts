@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Post } from "./posts.model";
+import { buildPostFilters } from "./posts.helpers";
 
 /**
  * @route GET /api/posts
@@ -14,10 +15,15 @@ export const getPosts = async (req: Request, res: Response) => {
     const page = Math.max(Number(req.query.page) || 1, 1);
     const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
     const skip = (page - 1) * limit;
+    const filters = buildPostFilters({
+      tags: typeof req.query.tags === "string" ? req.query.tags : undefined,
+      from: typeof req.query.from === "string" ? req.query.from : undefined,
+      to: typeof req.query.to === "string" ? req.query.to : undefined,
+    });
 
     const [posts, totalPosts] = await Promise.all([
-      Post.find().sort({ date: -1 }).skip(skip).limit(limit),
-      Post.countDocuments(),
+      Post.find(filters).sort({ date: -1 }).skip(skip).limit(limit),
+      Post.countDocuments(filters),
     ]);
 
     const totalPages = Math.ceil(totalPosts / limit);

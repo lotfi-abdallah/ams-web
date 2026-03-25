@@ -15,6 +15,12 @@ export interface PaginatedPostsResponse {
   };
 }
 
+export interface PostFilters {
+  tags?: string[];
+  from?: string;
+  to?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -24,12 +30,33 @@ export class PostsService {
 
   constructor(private api: ApiService) {}
 
-  getPostsPage(page: number, limit: number): Observable<PaginatedPostsResponse> {
-    return this.api.get<PaginatedPostsResponse>(`posts?page=${page}&limit=${limit}`);
+  getPostsPage(
+    page: number,
+    limit: number,
+    filters?: PostFilters,
+  ): Observable<PaginatedPostsResponse> {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+
+    if (filters?.tags?.length) {
+      params.set('tags', filters.tags.join(','));
+    }
+
+    if (filters?.from) {
+      params.set('from', filters.from);
+    }
+
+    if (filters?.to) {
+      params.set('to', filters.to);
+    }
+
+    return this.api.get<PaginatedPostsResponse>(`posts?${params.toString()}`);
   }
 
-  getPosts(page: number, limit: number): Observable<Post[]> {
-    return this.getPostsPage(page, limit).pipe(map((response) => response.data));
+  getPosts(page: number, limit: number, filters?: PostFilters): Observable<Post[]> {
+    return this.getPostsPage(page, limit, filters).pipe(map((response) => response.data));
   }
 
   getPost(postId: string): Observable<Post> {
