@@ -6,9 +6,11 @@ export const routes: Routes = [
   {
     path: '',
     component: Home,
+    title: 'Accueil | CERISoNet',
   },
   {
     path: 'login',
     component: Login,
+    title: 'Connexion | CERISoNet',
   },
 ];
