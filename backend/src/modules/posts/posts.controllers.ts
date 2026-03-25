@@ -65,12 +65,13 @@ export const getPostById = async (req: Request, res: Response) => {
  * Créer un nouveau post
  * - texte: contenu du post (obligatoire)
  * - image: image du post (optionnel)
+ * - tags: liste de tags (optionnel)
  *
  * Réponse: Détails du post créé ou message d'erreur en cas de problème lors de la création
  */
 export const createPost = async (req: Request, res: Response) => {
   try {
-    const { texte, image } = req.body;
+    const { texte, image, tags } = req.body;
     const userName = req.session.user?.username;
 
     if (!userName) {
@@ -81,10 +82,18 @@ export const createPost = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "texte is required" });
     }
 
+    const normalizedTags = Array.isArray(tags)
+      ? tags
+          .filter((tag): tag is string => typeof tag === "string")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag.length > 0)
+      : [];
+
     const newPost = new Post({
       auteur: userName,
       texte: texte.trim(),
       image: typeof image === "string" ? image.trim() : "",
+      tags: [...new Set(normalizedTags)],
       likes: [],
       commentaires: [],
       date: new Date(),
@@ -182,7 +191,13 @@ export const unlikePost = async (req: Request, res: Response) => {
 export const addComment = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { text } = req.body;
+    const rawText =
+      typeof req.body?.texte === "string"
+        ? req.body.texte
+        : typeof req.body?.text === "string"
+          ? req.body.text
+          : "";
+    const text = rawText.trim();
 
     const post = await Post.findById(id);
 
@@ -195,6 +210,10 @@ export const addComment = async (req: Request, res: Response) => {
 
     if (!userId || !userName) {
       return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    if (!text) {
+      return res.status(400).json({ message: "Comment text is required" });
     }
 
     const newComment = {
