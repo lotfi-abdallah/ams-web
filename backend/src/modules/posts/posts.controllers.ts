@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Post } from "./posts.model";
+import { enrichPostWithUsers, enrichPostsWithUsers } from "./posts.helpers";
 
 /**
  * @route GET /api/posts
@@ -16,14 +17,15 @@ export const getPosts = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const [posts, totalPosts] = await Promise.all([
-      Post.find().sort({ date: -1 }).skip(skip).limit(limit),
+      Post.find().sort({ _id: -1 }).skip(skip).limit(limit).lean(),
       Post.countDocuments(),
     ]);
+    const enrichedPosts = await enrichPostsWithUsers(posts as any[]);
 
     const totalPages = Math.ceil(totalPosts / limit);
 
     res.status(200).json({
-      data: posts,
+      data: enrichedPosts,
       pagination: {
         page,
         limit,
@@ -48,13 +50,15 @@ export const getPosts = async (req: Request, res: Response) => {
 export const getPostById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const post = await Post.findById(id);
+    const post = await Post.findById(id).lean();
 
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    res.status(200).json(post);
+    const enrichedPost = await enrichPostWithUsers(post);
+
+    res.status(200).json(enrichedPost);
   } catch (error) {
     res.status(500).json({ message: "Error fetching post", error });
   }
@@ -63,40 +67,57 @@ export const getPostById = async (req: Request, res: Response) => {
 /**
  * @route POST /api/posts
  * Créer un nouveau post
- * - texte: contenu du post (obligatoire)
- * - image: image du post (optionnel)
- * - tags: liste de tags (optionnel)
+ * - body: contenu du post (obligatoire)
+ * - imageUrl: URL de l'image (optionnel)
+ * - imageTitle: titre de l'image (optionnel)
+ * - hashtags: liste de hashtags (optionnel)
  *
  * Réponse: Détails du post créé ou message d'erreur en cas de problème lors de la création
  */
 export const createPost = async (req: Request, res: Response) => {
   try {
-    const { texte, image, tags } = req.body;
-    const userName = req.session.user?.username;
+    const { body, imageUrl, imageTitle, hashtags } = req.body;
+    const userId = req.session.user?.id;
 
-    if (!userName) {
+    if (!userId) {
       return res.status(401).json({ message: "User not authenticated" });
     }
 
-    if (!texte || typeof texte !== "string" || !texte.trim()) {
-      return res.status(400).json({ message: "texte is required" });
+    if (!body || typeof body !== "string" || !body.trim()) {
+      return res.status(400).json({ message: "body is required" });
     }
 
-    const normalizedTags = Array.isArray(tags)
-      ? tags
+    const normalizedHashtags = Array.isArray(hashtags)
+      ? hashtags
           .filter((tag): tag is string => typeof tag === "string")
           .map((tag) => tag.trim())
           .filter((tag) => tag.length > 0)
       : [];
 
+    const normalizedImageUrl =
+      typeof imageUrl === "string" ? imageUrl.trim() : "";
+    const normalizedImageTitle =
+      typeof imageTitle === "string" ? imageTitle.trim() : "";
+
+    const now = new Date();
+    const date = now.toISOString().slice(0, 10);
+    const hour = `${String(now.getHours()).padStart(2, "0")}:${String(
+      now.getMinutes(),
+    ).padStart(2, "0")}`;
+
     const newPost = new Post({
-      auteur: userName,
-      texte: texte.trim(),
-      image: typeof image === "string" ? image.trim() : "",
-      tags: [...new Set(normalizedTags)],
-      likes: [],
-      commentaires: [],
-      date: new Date(),
+      body: body.trim(),
+      createdBy: userId,
+      images:
+        normalizedImageUrl && normalizedImageTitle
+          ? { url: normalizedImageUrl, title: normalizedImageTitle }
+          : undefined,
+      hashtags: [...new Set(normalizedHashtags)],
+      likes: 0,
+      likedBy: [],
+      comments: [],
+      date,
+      hour,
     });
     const savedPost = await newPost.save();
 
@@ -123,19 +144,19 @@ export const likePost = async (req: Request, res: Response) => {
     }
 
     const userId = req.session.user?.id;
-    const userName = req.session.user?.username;
 
-    if (!userId || !userName) {
+    if (!userId) {
       return res.status(401).json({ message: "User not authenticated" });
     }
 
-    if (post.likes.includes(userName)) {
+    if (post.likedBy.includes(userId)) {
       return res
         .status(400)
         .json({ message: "Post already liked by this user" });
     }
 
-    post.likes.push(userName);
+    post.likedBy.push(userId);
+    post.likes = post.likedBy.length;
     await post.save();
 
     res.status(200).json({ message: "Post liked successfully", post });
@@ -161,17 +182,17 @@ export const unlikePost = async (req: Request, res: Response) => {
     }
 
     const userId = req.session.user?.id;
-    const userName = req.session.user?.username;
 
-    if (!userId || !userName) {
+    if (!userId) {
       return res.status(401).json({ message: "User not authenticated" });
     }
 
-    if (!post.likes.includes(userName)) {
+    if (!post.likedBy.includes(userId)) {
       return res.status(400).json({ message: "Post not liked by this user" });
     }
 
-    post.likes = post.likes.filter((like) => like !== userName);
+    post.likedBy = post.likedBy.filter((like) => like !== userId);
+    post.likes = post.likedBy.length;
     await post.save();
 
     res.status(200).json({ message: "Post unliked successfully", post });
@@ -191,12 +212,7 @@ export const unlikePost = async (req: Request, res: Response) => {
 export const addComment = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const rawText =
-      typeof req.body?.texte === "string"
-        ? req.body.texte
-        : typeof req.body?.text === "string"
-          ? req.body.text
-          : "";
+    const rawText = typeof req.body?.text === "string" ? req.body.text : "";
     const text = rawText.trim();
 
     const post = await Post.findById(id);
@@ -206,9 +222,8 @@ export const addComment = async (req: Request, res: Response) => {
     }
 
     const userId = req.session.user?.id;
-    const userName = req.session.user?.username;
 
-    if (!userId || !userName) {
+    if (!userId) {
       return res.status(401).json({ message: "User not authenticated" });
     }
 
@@ -216,13 +231,20 @@ export const addComment = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Comment text is required" });
     }
 
+    const now = new Date();
+    const commentDate = now.toISOString().slice(0, 10);
+    const commentHour = `${String(now.getHours()).padStart(2, "0")}:${String(
+      now.getMinutes(),
+    ).padStart(2, "0")}`;
+
     const newComment = {
-      auteur: userName,
-      texte: text,
-      date: new Date(),
+      text,
+      commentedBy: userId,
+      date: commentDate,
+      hour: commentHour,
     };
 
-    post.commentaires.push(newComment);
+    post.comments.push(newComment);
     await post.save();
 
     res.status(200).json({ message: "Comment added successfully", post });
@@ -242,9 +264,8 @@ export const addComment = async (req: Request, res: Response) => {
 export const deleteComment = async (req: Request, res: Response) => {
   try {
     const userId = req.session.user?.id;
-    const userName = req.session.user?.username;
 
-    if (!userId || !userName) {
+    if (!userId) {
       return res.status(401).json({ message: "User not authenticated" });
     }
 
@@ -256,21 +277,19 @@ export const deleteComment = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    const comment = post.commentaires.find(
-      (c) => c._id?.toString() === commentId,
-    );
+    const comment = post.comments.find((c) => c._id?.toString() === commentId);
 
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    if (comment.auteur !== userName) {
+    if (comment.commentedBy !== userId) {
       return res
         .status(403)
         .json({ message: "User not authorized to delete this comment" });
     }
 
-    post.commentaires = post.commentaires.filter(
+    post.comments = post.comments.filter(
       (c) => c._id?.toString() !== commentId,
     );
     await post.save();
