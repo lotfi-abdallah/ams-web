@@ -1,12 +1,13 @@
 import { Component, DestroyRef, HostListener, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Post as PostModel } from '../../../models';
-import { PostsService } from '../../../services/posts.service';
+import { PostsFilter, PostsService } from '../../../services/posts.service';
 import { PostCard } from './post';
+import { PostsFilterComponent } from './components/posts-filter/posts-filter';
 
 @Component({
   selector: 'app-posts-list',
-  imports: [PostCard],
+  imports: [PostCard, PostsFilterComponent],
   templateUrl: './posts-list.html',
 })
 export class PostsList implements OnInit {
@@ -20,6 +21,7 @@ export class PostsList implements OnInit {
   hasNextPage = signal(true);
   currentPage = signal(1);
 
+  private currentFilter: PostsFilter = {};
   private destroyRef = inject(DestroyRef);
 
   constructor(private postsService: PostsService) {}
@@ -30,6 +32,11 @@ export class PostsList implements OnInit {
     this.postsService.refreshTimeline$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.reloadPosts());
+  }
+
+  onFilterChanged(filter: PostsFilter): void {
+    this.currentFilter = filter;
+    this.reloadPosts();
   }
 
   @HostListener('window:scroll')
@@ -57,7 +64,7 @@ export class PostsList implements OnInit {
     this.currentPage.set(1);
     this.hasNextPage.set(true);
 
-    this.postsService.getPostsPage(1, this.postsPerPage).subscribe({
+    this.postsService.getPostsPage(1, this.postsPerPage, this.currentFilter).subscribe({
       next: (response) => {
         this.posts.set(response.data);
         this.currentPage.set(response.pagination.page);
@@ -81,7 +88,7 @@ export class PostsList implements OnInit {
 
     const nextPage = this.currentPage() + 1;
 
-    this.postsService.getPostsPage(nextPage, this.postsPerPage).subscribe({
+    this.postsService.getPostsPage(nextPage, this.postsPerPage, this.currentFilter).subscribe({
       next: (response) => {
         this.posts.update((currentPosts) => [...currentPosts, ...response.data]);
         this.currentPage.set(response.pagination.page);

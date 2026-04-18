@@ -11,6 +11,8 @@
     </button>
   </div>
 
+  <app-posts-filter (filterChanged)="onFilterChanged($event)" />
+
   @if (isLoading()) {
     <p class="text-sm text-hn-muted">Chargement des posts...</p>
   } @else if (errorMessage()) {

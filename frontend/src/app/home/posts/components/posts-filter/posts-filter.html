@@ -1,0 +1,37 @@
+<div class="flex flex-wrap items-center gap-2 pb-2 border-b border-hn-border">
+  <select
+    [ngModel]="sortOption()"
+    (ngModelChange)="applySort($event)"
+    class="text-xs border border-hn-border rounded px-2 py-1.5 bg-hn-surface text-hn-text"
+  >
+    <option value="newest">Plus récents</option>
+    <option value="oldest">Plus anciens</option>
+    <option value="mostLiked">Plus aimés</option>
+  </select>
+
+  <input
+    type="text"
+    placeholder="Filtrer par hashtag..."
+    [ngModel]="hashtagInput()"
+    (ngModelChange)="hashtagInput.set($event)"
+    (keyup.enter)="applyHashtag()"
+    class="text-xs border border-hn-border rounded px-2 py-1.5 bg-hn-surface text-hn-text placeholder:text-hn-muted"
+  />
+  <button
+    type="button"
+    (click)="applyHashtag()"
+    class="text-xs px-2 py-1.5 rounded border border-hn-border bg-hn-surface text-hn-muted hover:text-hn-text"
+  >
+    Filtrer
+  </button>
+
+  @if (hasActiveFilters) {
+    <button
+      type="button"
+      (click)="clearFilters()"
+      class="text-xs px-2 py-1.5 rounded border border-red-200 text-red-500 hover:text-red-700"
+    >
+      Effacer les filtres
+    </button>
+  }
+</div>

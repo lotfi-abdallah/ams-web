@@ -3,6 +3,12 @@ import { ApiService } from './api.service';
 import { map, Observable, Subject } from 'rxjs';
 import { Post } from '../models';
 
+export interface PostsFilter {
+  sort?: 'newest' | 'oldest' | 'mostLiked';
+  hashtag?: string;
+  author?: number;
+}
+
 export interface PaginatedPostsResponse {
   data: Post[];
   pagination: {
@@ -24,8 +30,12 @@ export class PostsService {
 
   constructor(private api: ApiService) {}
 
-  getPostsPage(page: number, limit: number): Observable<PaginatedPostsResponse> {
-    return this.api.get<PaginatedPostsResponse>(`posts?page=${page}&limit=${limit}`);
+  getPostsPage(page: number, limit: number, filter: PostsFilter = {}): Observable<PaginatedPostsResponse> {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    if (filter.sort)    params.set('sort', filter.sort);
+    if (filter.hashtag) params.set('hashtag', filter.hashtag);
+    if (filter.author)  params.set('author', String(filter.author));
+    return this.api.get<PaginatedPostsResponse>(`posts?${params.toString()}`);
   }
 
   getPosts(page: number, limit: number): Observable<Post[]> {

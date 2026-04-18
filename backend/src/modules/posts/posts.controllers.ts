@@ -16,9 +16,28 @@ export const getPosts = async (req: Request, res: Response) => {
     const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
     const skip = (page - 1) * limit;
 
+    const sortParam = String(req.query.sort || "newest");
+    const hashtagParam = req.query.hashtag ? String(req.query.hashtag).trim() : null;
+    const authorParam = req.query.author ? Number(req.query.author) : null;
+
+    const sortMap: Record<string, Record<string, 1 | -1>> = {
+      newest:    { _id: -1 },
+      oldest:    { _id: 1  },
+      mostLiked: { likes: -1 },
+    };
+    const sortOrder = sortMap[sortParam] ?? sortMap["newest"];
+
+    const filter: Record<string, unknown> = {};
+    if (hashtagParam) {
+      filter.hashtags = { $regex: new RegExp(`^${hashtagParam}$`, "i") };
+    }
+    if (authorParam && Number.isInteger(authorParam)) {
+      filter.createdBy = authorParam;
+    }
+
     const [posts, totalPosts] = await Promise.all([
-      Post.find().sort({ _id: -1 }).skip(skip).limit(limit).lean(),
-      Post.countDocuments(),
+      Post.find(filter).sort(sortOrder).skip(skip).limit(limit).lean(),
+      Post.countDocuments(filter),
     ]);
     const enrichedPosts = await enrichPostsWithUsers(posts as any[]);
 
@@ -283,7 +302,7 @@ export const deleteComment = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    if (comment.commentedBy !== userId) {
+    if (comment.commentedBy !== userId && post.createdBy !== userId) {
       return res
         .status(403)
         .json({ message: "User not authorized to delete this comment" });
