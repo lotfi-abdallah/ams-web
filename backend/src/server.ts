@@ -1,9 +1,9 @@
 import { app } from "./app";
-import { env } from "./src/config/env";
+import { env } from "./config/env";
 import https from "https";
 import fs from "fs";
-import { connectDB } from "./src/config/postgres";
-import { connectMongoDB } from "./src/config/mongodb";
+import { connectDB } from "./config/postgres";
+import { connectMongoDB } from "./config/mongodb";
 
 // Connect to the database before starting the server
 connectDB();

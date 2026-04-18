@@ -1,9 +1,10 @@
 import express from "express";
-import { errorHandler } from "./src/middlewares/error.middleware";
-import authRoutes from "./src/modules/auth/auth.routes";
-import postRoutes from "./src/modules/posts/posts.routes";
-import { createMongoSessionStore, session } from "./src/config/mongodb";
-import { env } from "./src/config/env";
+import path from "path";
+import { errorHandler } from "./middlewares/error.middleware";
+import authRoutes from "./modules/auth/auth.routes";
+import postRoutes from "./modules/posts/posts.routes";
+import { createMongoSessionStore, session } from "./config/mongodb";
+import { env } from "./config/env";
 
 /**
  * Initialisation de l'application Express.
@@ -40,9 +41,10 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 
-app.use(express.static("../frontend/dist/frontend/browser"));
+const staticDir = __dirname;
+app.use(express.static(staticDir));
 app.get("/*rest", (req, res) => {
-  res.sendFile("index.html", { root: "../frontend/dist/frontend/browser" });
+  res.sendFile(path.join(staticDir, "index.html"));
 });
 // Auth routes
 
