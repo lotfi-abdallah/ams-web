@@ -1,39 +1,67 @@
 import { Schema, Document, model } from "mongoose";
 
 interface Comment {
-  auteur: string;
-  texte: string;
-  date: Date;
+  text: string;
+  commentedBy: number;
+  date: string;
+  hour: string;
   _id?: Schema.Types.ObjectId;
 }
 
-interface IPost extends Document {
-  auteur: string;
-  texte: string;
-  likes: string[];
-  image: string;
-  date: Date;
-  commentaires: Comment[];
-  tags?: string[];
+interface PostImage {
+  url: string;
+  title: string;
 }
 
+interface IPost extends Document {
+  date: string;
+  hour: string;
+  body: string;
+  createdBy: number;
+  images?: PostImage;
+  likes: number;
+  likedBy: number[];
+  hashtags: string[];
+  comments: Comment[];
+}
+
+const getCurrentDate = () => new Date().toISOString().slice(0, 10);
+
+const getCurrentHour = () => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+
 const commentSchema = new Schema<Comment>({
-  auteur: { type: String, required: true },
-  texte: { type: String, required: true },
-  date: { type: Date, default: Date.now },
+  text: { type: String, required: true },
+  commentedBy: { type: Number, required: true },
+  date: { type: String, default: getCurrentDate },
+  hour: { type: String, default: getCurrentHour },
 });
+
+const imageSchema = new Schema<PostImage>(
+  {
+    url: { type: String, required: true },
+    title: { type: String, required: true },
+  },
+  { _id: false },
+);
 
 const postSchema = new Schema<IPost>(
   {
-    auteur: { type: String, required: true },
-    texte: { type: String, required: true },
-    likes: [String],
-    image: String,
-    date: { type: Date, default: Date.now },
-    commentaires: [commentSchema],
-    tags: { type: [String], default: [] },
+    date: { type: String, default: getCurrentDate },
+    hour: { type: String, default: getCurrentHour },
+    body: { type: String, required: true },
+    createdBy: { type: Number, required: true },
+    images: { type: imageSchema, required: false },
+    likes: { type: Number, default: 0 },
+    likedBy: { type: [Number], default: [] },
+    hashtags: { type: [String], default: [] },
+    comments: { type: [commentSchema], default: [] },
   },
   { timestamps: false },
 );
 
-export const Post = model<IPost>("Post", postSchema);
+export const Post = model<IPost>("Post", postSchema, "CERISoNet");
