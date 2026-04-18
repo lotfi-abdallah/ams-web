@@ -13,7 +13,7 @@
       [color]="isLikedByCurrentUser() ? '#ff6600' : '#a6a6a6'"
       [strokeWidth]="isLikedByCurrentUser() ? '3' : '2'"
     ></svg>
-    <span [class.text-hn-orange]="isLikedByCurrentUser()">{{ post().likes.length }}</span>
+    <span [class.text-hn-orange]="isLikedByCurrentUser()">{{ post().likes }}</span>
   </button>
   <button
     type="button"
@@ -23,6 +23,6 @@
     [attr.aria-expanded]="isCommentsOpen()"
   >
     <svg [lucideIcon]="commentIcon" class="w-3.5 h-3.5"></svg>
-    <span>{{ post().commentaires.length }}</span>
+    <span>{{ post().comments.length }}</span>
   </button>
 </footer>

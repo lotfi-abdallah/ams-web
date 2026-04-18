@@ -1,5 +1,4 @@
 import { Component, input, output } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import {
   LucideChevronDown,
   LucideDynamicIcon,
@@ -10,7 +9,7 @@ import { Post as PostModel } from '../../../../../models';
 
 @Component({
   selector: 'app-post-header',
-  imports: [DatePipe, LucideDynamicIcon],
+  imports: [LucideDynamicIcon],
   templateUrl: './post-header.html',
 })
 export class PostHeader {
@@ -25,5 +24,18 @@ export class PostHeader {
 
   onToggleWrap() {
     this.toggleWrap.emit();
+  }
+
+  authorLabel(): string {
+    return this.post().createdByUser?.pseudo ?? `User #${this.post().createdBy}`;
+  }
+
+  authorInitial(): string {
+    const pseudo = this.post().createdByUser?.pseudo?.trim();
+    return pseudo ? pseudo.charAt(0).toUpperCase() : String(this.post().createdBy).charAt(0);
+  }
+
+  publishedAt(): string {
+    return `${this.post().date} ${this.post().hour}`;
   }
 }

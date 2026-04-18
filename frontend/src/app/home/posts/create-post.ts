@@ -10,9 +10,10 @@ import { AuthService } from '../../../services/auth.service';
   templateUrl: './create-post.html',
 })
 export class CreatePost {
-  texte = '';
-  image = '';
-  tags = '';
+  body = '';
+  imageUrl = '';
+  imageTitle = '';
+  hashtags = '';
   isSubmitting = false;
 
   constructor(
@@ -33,16 +34,22 @@ export class CreatePost {
       return;
     }
 
-    const trimmedText = this.texte.trim();
-    const trimmedImage = this.image.trim();
-    const normalizedTags = this.tags
+    const trimmedBody = this.body.trim();
+    const trimmedImageUrl = this.imageUrl.trim();
+    const trimmedImageTitle = this.imageTitle.trim();
+    const normalizedHashtags = this.hashtags
       .split(',')
       .map((tag) => tag.trim())
       .filter((tag) => tag.length > 0);
-    const uniqueTags = [...new Set(normalizedTags)];
+    const uniqueHashtags = [...new Set(normalizedHashtags)];
 
-    if (!trimmedText) {
-      this.notification.error('Le texte du post est obligatoire.');
+    if (!trimmedBody) {
+      this.notification.error('Le contenu du post est obligatoire.');
+      return;
+    }
+
+    if ((trimmedImageUrl && !trimmedImageTitle) || (!trimmedImageUrl && trimmedImageTitle)) {
+      this.notification.error("Renseignez l'URL et le titre de l'image ensemble.");
       return;
     }
 
@@ -50,15 +57,17 @@ export class CreatePost {
 
     this.postsService
       .createPost({
-        texte: trimmedText,
-        image: trimmedImage || undefined,
-        tags: uniqueTags,
+        body: trimmedBody,
+        imageUrl: trimmedImageUrl || undefined,
+        imageTitle: trimmedImageTitle || undefined,
+        hashtags: uniqueHashtags,
       })
       .subscribe({
         next: () => {
-          this.texte = '';
-          this.image = '';
-          this.tags = '';
+          this.body = '';
+          this.imageUrl = '';
+          this.imageTitle = '';
+          this.hashtags = '';
           this.postsService.notifyTimelineRefresh();
           this.notification.success('Post publié avec succès.');
           this.isSubmitting = false;

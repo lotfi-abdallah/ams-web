@@ -16,22 +16,22 @@ export class PostInteractionFacade {
   ) {}
 
   isLikedByCurrentUser(post: PostModel): boolean {
-    const userName = this.getCurrentUserName();
+    const userId = this.getCurrentUserId();
 
-    if (!userName) {
+    if (userId === null) {
       return false;
     }
 
-    return post.likes.includes(userName);
+    return Array.isArray(post.likedBy) && post.likedBy.includes(userId);
   }
 
-  getCurrentUserNameValue(): string | null {
-    return this.getCurrentUserName();
+  getCurrentUserIdValue(): number | null {
+    return this.getCurrentUserId();
   }
 
-  canDeleteComment(commentAuthor: string): boolean {
-    const userName = this.getCurrentUserName();
-    return !!userName && userName === commentAuthor;
+  canDeleteComment(commentedBy: number): boolean {
+    const userId = this.getCurrentUserId();
+    return userId !== null && userId === commentedBy;
   }
 
   toggleLike(post: PostModel): Observable<void> {
@@ -40,18 +40,21 @@ export class PostInteractionFacade {
       return EMPTY;
     }
 
-    const userName = this.getCurrentUserName();
-    if (!userName) {
+    const userId = this.getCurrentUserId();
+    if (userId === null) {
       this.notification.error('Veuillez vous connecter pour aimer une publication.');
       return EMPTY;
     }
 
     const liked = this.isLikedByCurrentUser(post);
-    const previousLikes = [...post.likes];
+    const safeLikedBy = Array.isArray(post.likedBy) ? post.likedBy : [];
+    const previousLikedBy = [...safeLikedBy];
+    const previousLikesCount = post.likes;
 
-    post.likes = liked
-      ? post.likes.filter((like: string) => like !== userName)
-      : [...post.likes, userName];
+    post.likedBy = liked
+      ? safeLikedBy.filter((like: number) => like !== userId)
+      : [...safeLikedBy, userId];
+    post.likes = post.likedBy.length;
 
     const request$ = liked
       ? this.postsService.unlikePost(postId)
@@ -59,34 +62,35 @@ export class PostInteractionFacade {
 
     return request$.pipe(
       catchError((error) => {
-        post.likes = previousLikes;
+        post.likedBy = previousLikedBy;
+        post.likes = previousLikesCount;
         this.notification.error("Impossible de mettre a jour le j'aime.");
         return throwError(() => error);
       }),
     );
   }
 
-  addComment(post: PostModel, texte: string): Observable<void> {
+  addComment(post: PostModel, text: string): Observable<void> {
     const postId = post._id;
     if (!postId) {
       return EMPTY;
     }
 
-    const userName = this.getCurrentUserName();
-    if (!userName) {
+    const userId = this.getCurrentUserId();
+    if (userId === null) {
       this.notification.error('Veuillez vous connecter pour commenter une publication.');
       return EMPTY;
     }
 
-    const trimmedText = texte.trim();
+    const trimmedText = text.trim();
     if (!trimmedText) {
       this.notification.error('Le commentaire ne peut pas etre vide.');
       return EMPTY;
     }
 
-    return this.postsService.addComment(postId, { texte: trimmedText }).pipe(
+    return this.postsService.addComment(postId, { text: trimmedText }).pipe(
       map((updatedPost: PostModel) => {
-        post.commentaires = updatedPost.commentaires;
+        post.comments = updatedPost.comments;
       }),
       catchError((error) => {
         this.notification.error("Impossible d'ajouter le commentaire.");
@@ -103,7 +107,7 @@ export class PostInteractionFacade {
 
     return this.postsService.deleteComment(postId, commentId).pipe(
       map((updatedPost: PostModel) => {
-        post.commentaires = updatedPost.commentaires;
+        post.comments = updatedPost.comments;
       }),
       catchError((error) => {
         this.notification.error('Impossible de supprimer le commentaire.');
@@ -112,8 +116,8 @@ export class PostInteractionFacade {
     );
   }
 
-  private getCurrentUserName(): string | null {
-    const currentUser = this.authService.user() as { pseudo?: string; username?: string } | null;
-    return currentUser?.username ?? currentUser?.pseudo ?? null;
+  private getCurrentUserId(): number | null {
+    const currentUser = this.authService.user() as { id?: number } | null;
+    return typeof currentUser?.id === 'number' ? currentUser.id : null;
   }
 }

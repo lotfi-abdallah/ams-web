@@ -21,13 +21,13 @@
     [class.pointer-events-none]="!isLoggedIn()"
   >
     <div>
-      <label for="postText" class="block text-sm font-medium text-hn-text mb-1"
-        >Texte<b>*</b></label
+      <label for="postBody" class="block text-sm font-medium text-hn-text mb-1"
+        >Contenu<b>*</b></label
       >
       <textarea
-        id="postText"
-        name="postText"
-        [(ngModel)]="texte"
+        id="postBody"
+        name="postBody"
+        [(ngModel)]="body"
         rows="4"
         class="w-full rounded border border-hn-border bg-hn-bg px-3 py-2 text-sm text-hn-text focus:outline-none focus:ring-2 focus:ring-hn-orange"
         placeholder="Que se passe-t-il ?"
@@ -35,30 +35,44 @@
     </div>
 
     <div>
-      <label for="postImage" class="block text-sm font-medium text-hn-text mb-1"
-        >Image <b>( TODO )</b></label
+      <label for="postImageUrl" class="block text-sm font-medium text-hn-text mb-1"
+        >Image URL</label
       >
       <input
-        id="postImage"
-        name="postImage"
-        [(ngModel)]="image"
+        id="postImageUrl"
+        name="postImageUrl"
+        [(ngModel)]="imageUrl"
         type="text"
         class="w-full rounded border border-hn-border bg-hn-bg px-3 py-2 text-sm text-hn-text focus:outline-none focus:ring-2 focus:ring-hn-orange"
-        placeholder="/uploads/filename.jpeg"
+        placeholder="https://example.com/image.jpg"
       />
     </div>
 
     <div>
-      <label for="postTags" class="block text-sm font-medium text-hn-text mb-1">Tags</label>
+      <label for="postImageTitle" class="block text-sm font-medium text-hn-text mb-1"
+        >Image titre</label
+      >
       <input
-        id="postTags"
-        name="postTags"
-        [(ngModel)]="tags"
+        id="postImageTitle"
+        name="postImageTitle"
+        [(ngModel)]="imageTitle"
         type="text"
         class="w-full rounded border border-hn-border bg-hn-bg px-3 py-2 text-sm text-hn-text focus:outline-none focus:ring-2 focus:ring-hn-orange"
-        placeholder="angular, frontend, api"
+        placeholder="Au studio !"
       />
-      <p class="mt-1 text-xs text-hn-muted">Séparez les tags par des virgules.</p>
+    </div>
+
+    <div>
+      <label for="postHashtags" class="block text-sm font-medium text-hn-text mb-1">Hashtags</label>
+      <input
+        id="postHashtags"
+        name="postHashtags"
+        [(ngModel)]="hashtags"
+        type="text"
+        class="w-full rounded border border-hn-border bg-hn-bg px-3 py-2 text-sm text-hn-text focus:outline-none focus:ring-2 focus:ring-hn-orange"
+        placeholder="#marseille, #jul, #13015"
+      />
+      <p class="mt-1 text-xs text-hn-muted">Séparez les hashtags par des virgules.</p>
     </div>
 
     <button

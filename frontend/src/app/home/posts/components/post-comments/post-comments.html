@@ -1,16 +1,18 @@
 <section class="mt-4 pt-4 border-t border-hn-border space-y-3">
   <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
-    @if (post().commentaires.length === 0) {
+    @if (post().comments.length === 0) {
       <p class="text-xs text-hn-muted">Aucun commentaire pour le moment.</p>
     } @else {
-      @for (comment of post().commentaires; track comment._id ?? comment.date) {
+      @for (comment of post().comments; track comment._id ?? comment.date + comment.hour) {
         <article class="rounded border border-hn-border bg-hn-bg p-2.5">
           <div class="min-w-0">
-            <p class="text-xs text-hn-text font-semibold">{{ comment.auteur }}</p>
-            <p class="text-xs text-hn-muted">{{ comment.date | date: 'short' }}</p>
+            <p class="text-xs text-hn-text font-semibold">
+              {{ comment.commentedByUser?.pseudo || 'User #' + comment.commentedBy }}
+            </p>
+            <p class="text-xs text-hn-muted">{{ comment.date }} {{ comment.hour }}</p>
           </div>
 
-          <p class="text-sm text-hn-text whitespace-pre-wrap mt-1">{{ comment.texte }}</p>
+          <p class="text-sm text-hn-text whitespace-pre-wrap mt-1">{{ comment.text }}</p>
         </article>
       }
     }

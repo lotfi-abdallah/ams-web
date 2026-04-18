@@ -10,18 +10,28 @@ export interface User {
 
 export interface Comment {
   _id?: string;
-  auteur: string;
-  texte: string;
-  date: Date;
+  text: string;
+  commentedBy: number;
+  commentedByUser?: Pick<User, 'id' | 'pseudo' | 'nom' | 'prenom' | 'avatar'> | null;
+  date: string;
+  hour: string;
+}
+
+export interface PostImage {
+  url: string;
+  title: string;
 }
 
 export interface Post {
   _id?: string;
-  auteur: string;
-  texte: string;
-  likes: string[];
-  image: string;
-  date: Date;
-  commentaires: Comment[];
-  tags?: string[];
+  date: string;
+  hour: string;
+  body: string;
+  createdBy: number;
+  createdByUser?: Pick<User, 'id' | 'pseudo' | 'nom' | 'prenom' | 'avatar'> | null;
+  images?: PostImage;
+  likes: number;
+  likedBy: number[];
+  hashtags?: string[];
+  comments: Comment[];
 }
