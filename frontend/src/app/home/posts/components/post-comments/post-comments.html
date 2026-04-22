@@ -4,17 +4,48 @@
       <p class="text-xs text-hn-muted">Aucun commentaire pour le moment.</p>
     } @else {
       @for (comment of post().comments; track comment._id ?? comment.date + comment.hour) {
-        <article class="rounded border border-hn-border bg-hn-bg p-2.5">
-          <div class="min-w-0">
+        <article
+          class="rounded border border-hn-border bg-hn-bg p-2.5 flex justify-between items-start gap-2"
+        >
+          <div class="min-w-0 flex-1">
             <p class="text-xs text-hn-text font-semibold">
               {{ comment.commentedByUser?.pseudo || 'User #' + comment.commentedBy }}
             </p>
             <p class="text-xs text-hn-muted">{{ comment.date }} {{ comment.hour }}</p>
+            <p class="text-sm text-hn-text whitespace-pre-wrap mt-1">{{ comment.text }}</p>
           </div>
-
-          <p class="text-sm text-hn-text whitespace-pre-wrap mt-1">{{ comment.text }}</p>
+          @if (comment._id && canDelete(comment.commentedBy)) {
+            <button
+              type="button"
+              (click)="deleteComment(comment._id)"
+              class="cursor-pointer shrink-0 text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-1"
+              aria-label="Supprimer le commentaire"
+            >
+              <svg [lucideIcon]="trashIcon" class="w-3.5 h-3.5"></svg>
+            </button>
+          }
         </article>
       }
     }
   </div>
+
+  @if (isLoggedIn()) {
+    <form (ngSubmit)="submitComment()" class="flex gap-2 mt-3">
+      <textarea
+        name="commentText"
+        [(ngModel)]="commentText"
+        rows="2"
+        placeholder="Écrire un commentaire..."
+        [disabled]="isSubmitting"
+        class="flex-1 text-sm rounded border border-hn-border bg-hn-bg text-hn-text px-3 py-2 resize-none placeholder:text-hn-muted focus:outline-none focus:border-hn-orange"
+      ></textarea>
+      <button
+        type="submit"
+        [disabled]="isSubmitting || !commentText.trim()"
+        class="px-3 py-2 text-sm rounded border border-hn-border bg-hn-surface text-hn-text hover:bg-hn-bg disabled:opacity-60 disabled:cursor-not-allowed self-end"
+      >
+        Envoyer
+      </button>
+    </form>
+  }
 </section>

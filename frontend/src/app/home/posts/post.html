@@ -19,7 +19,7 @@
     />
 
     @if (isCommentsOpen()) {
-      <app-post-comments [post]="post()" />
+      <app-post-comments [post]="post()" (postUpdated)="onPostUpdated($event)" />
     }
   }
 </article>

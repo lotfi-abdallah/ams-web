@@ -14,10 +14,19 @@ import { NotificationService } from '../../../services/notification.service';
   templateUrl: './post.html',
 })
 export class PostCard {
-  post = input.required<PostModel>();
+  postInput = input.required<PostModel>({ alias: 'post' });
+  localPost = signal<PostModel | null>(null);
   isWrapped = signal(false);
   isLikeLoading = signal(false);
   isCommentsOpen = signal(false);
+
+  post(): PostModel {
+    return this.localPost() ?? this.postInput();
+  }
+
+  onPostUpdated(updated: PostModel): void {
+    this.localPost.set(updated);
+  }
 
   constructor(
     private postInteraction: PostInteractionFacade,
