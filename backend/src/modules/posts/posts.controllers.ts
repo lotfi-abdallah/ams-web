@@ -266,7 +266,8 @@ export const addComment = async (req: Request, res: Response) => {
     post.comments.push(newComment);
     await post.save();
 
-    res.status(200).json({ message: "Comment added successfully", post });
+    const enrichedPost = await enrichPostWithUsers(post.toObject() as any);
+    res.status(200).json({ message: "Comment added successfully", post: enrichedPost });
   } catch (error) {
     res.status(500).json({ message: "Error adding comment", error });
   }
@@ -313,7 +314,8 @@ export const deleteComment = async (req: Request, res: Response) => {
     );
     await post.save();
 
-    res.status(200).json({ message: "Comment deleted successfully", post });
+    const enrichedPost = await enrichPostWithUsers(post.toObject() as any);
+    res.status(200).json({ message: "Comment deleted successfully", post: enrichedPost });
   } catch (error) {
     res.status(500).json({ message: "Error deleting comment", error });
   }
