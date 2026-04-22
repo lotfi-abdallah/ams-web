@@ -4,6 +4,7 @@ import https from "https";
 import fs from "fs";
 import { connectDB } from "./config/postgres";
 import { connectMongoDB } from "./config/mongodb";
+import { initSocket } from "./config/socket";
 
 // Connect to the database before starting the server
 connectDB();
@@ -20,11 +21,15 @@ const httpsOptions = {
 /**
  * Démarrage du serveur HTTPS sur le port spécifié dans les variables d'environnement.
  */
-https.createServer(httpsOptions, app).listen(env.httpsPort, () => {
-  console.log(
-    `Serveur HTTPS démarré sur le port https://${env.host}:${env.httpsPort}`,
-  );
-});
+const httpsServer = https
+  .createServer(httpsOptions, app)
+  .listen(env.httpsPort, () => {
+    console.log(
+      `Serveur HTTPS démarré sur le port https://${env.host}:${env.httpsPort}`,
+    );
+  });
+
+initSocket(httpsServer);
 
 /**
  * Démarrage du serveur HTTP sur le port spécifié dans les variables d'environnement.
