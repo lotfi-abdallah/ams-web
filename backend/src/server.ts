@@ -5,6 +5,7 @@ import fs from "fs";
 import { connectDB } from "./config/postgres";
 import { connectMongoDB } from "./config/mongodb";
 import { initSocket } from "./config/socket";
+import { sessionMiddleware } from "./config/session";
 
 // Connect to the database before starting the server
 connectDB();
@@ -29,7 +30,7 @@ const httpsServer = https
     );
   });
 
-initSocket(httpsServer);
+initSocket(httpsServer, sessionMiddleware);
 
 /**
  * Démarrage du serveur HTTP sur le port spécifié dans les variables d'environnement.
