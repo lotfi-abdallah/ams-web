@@ -72,8 +72,9 @@ export class CreatePost {
           this.notification.success('Post publié avec succès.');
           this.isSubmitting = false;
         },
-        error: () => {
-          this.notification.error('Impossible de publier le post.');
+        error: (err) => {
+          const msg = err?.error?.message ?? 'Impossible de publier le post.';
+          this.notification.error(msg);
           this.isSubmitting = false;
         },
       });

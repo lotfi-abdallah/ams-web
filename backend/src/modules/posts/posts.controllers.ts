@@ -17,19 +17,25 @@ export const getPosts = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const sortParam = String(req.query.sort || "newest");
-    const hashtagParam = req.query.hashtag ? String(req.query.hashtag).trim() : null;
+    const rawHashtag = req.query.hashtag
+      ? String(req.query.hashtag).trim()
+      : null;
+    const hashtagParam =
+      rawHashtag && rawHashtag.length <= 50
+        ? rawHashtag.replace(/^#/, "")
+        : null;
     const authorParam = req.query.author ? Number(req.query.author) : null;
 
     const sortMap: Record<string, Record<string, 1 | -1>> = {
-      newest:    { _id: -1 },
-      oldest:    { _id: 1  },
+      newest: { _id: -1 },
+      oldest: { _id: 1 },
       mostLiked: { likes: -1 },
     };
     const sortOrder = sortMap[sortParam] ?? sortMap["newest"];
 
     const filter: Record<string, unknown> = {};
     if (hashtagParam) {
-      filter.hashtags = { $regex: new RegExp(`^${hashtagParam}$`, "i") };
+      filter.hashtags = hashtagParam;
     }
     if (authorParam && Number.isInteger(authorParam)) {
       filter.createdBy = authorParam;
@@ -55,7 +61,9 @@ export const getPosts = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching posts", error });
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la récupération des posts.", error });
   }
 };
 
@@ -72,14 +80,16 @@ export const getPostById = async (req: Request, res: Response) => {
     const post = await Post.findById(id).lean();
 
     if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+      return res.status(404).json({ message: "Post introuvable." });
     }
 
     const enrichedPost = await enrichPostWithUsers(post);
 
     res.status(200).json(enrichedPost);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching post", error });
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la récupération du post.", error });
   }
 };
 
@@ -99,11 +109,21 @@ export const createPost = async (req: Request, res: Response) => {
     const userId = req.session.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "User not authenticated" });
+      return res.status(401).json({ message: "Utilisateur non authentifié." });
     }
 
     if (!body || typeof body !== "string" || !body.trim()) {
-      return res.status(400).json({ message: "body is required" });
+      return res
+        .status(400)
+        .json({ message: "Le contenu du post est obligatoire." });
+    }
+
+    if (body.length > 300) {
+      return res
+        .status(400)
+        .json({
+          message: "Le contenu du post ne peut pas dépasser 300 caractères.",
+        });
     }
 
     const normalizedHashtags = Array.isArray(hashtags)
@@ -142,7 +162,9 @@ export const createPost = async (req: Request, res: Response) => {
 
     res.status(201).json(savedPost);
   } catch (error) {
-    res.status(500).json({ message: "Error creating post", error });
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la création du post.", error });
   }
 };
 
@@ -159,28 +181,28 @@ export const likePost = async (req: Request, res: Response) => {
     const post = await Post.findById(id);
 
     if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+      return res.status(404).json({ message: "Post introuvable." });
     }
 
     const userId = req.session.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "User not authenticated" });
+      return res.status(401).json({ message: "Utilisateur non authentifié." });
     }
 
     if (post.likedBy.includes(userId)) {
       return res
         .status(400)
-        .json({ message: "Post already liked by this user" });
+        .json({ message: "Post déjà aimé par cet utilisateur." });
     }
 
     post.likedBy.push(userId);
     post.likes = post.likedBy.length;
     await post.save();
 
-    res.status(200).json({ message: "Post liked successfully", post });
+    res.status(200).json({ message: "Post aimé avec succès.", post });
   } catch (error) {
-    res.status(500).json({ message: "Error liking post", error });
+    res.status(500).json({ message: "Erreur lors de l'ajout du like.", error });
   }
 };
 
@@ -197,26 +219,28 @@ export const unlikePost = async (req: Request, res: Response) => {
     const post = await Post.findById(id);
 
     if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+      return res.status(404).json({ message: "Post introuvable." });
     }
 
     const userId = req.session.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "User not authenticated" });
+      return res.status(401).json({ message: "Utilisateur non authentifié." });
     }
 
     if (!post.likedBy.includes(userId)) {
-      return res.status(400).json({ message: "Post not liked by this user" });
+      return res
+        .status(400)
+        .json({ message: "Post non aimé par cet utilisateur." });
     }
 
     post.likedBy = post.likedBy.filter((like) => like !== userId);
     post.likes = post.likedBy.length;
     await post.save();
 
-    res.status(200).json({ message: "Post unliked successfully", post });
+    res.status(200).json({ message: "Like retiré avec succès.", post });
   } catch (error) {
-    res.status(500).json({ message: "Error unliking post", error });
+    res.status(500).json({ message: "Erreur lors du retrait du like.", error });
   }
 };
 
@@ -237,17 +261,19 @@ export const addComment = async (req: Request, res: Response) => {
     const post = await Post.findById(id);
 
     if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+      return res.status(404).json({ message: "Post introuvable." });
     }
 
     const userId = req.session.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "User not authenticated" });
+      return res.status(401).json({ message: "Utilisateur non authentifié." });
     }
 
     if (!text) {
-      return res.status(400).json({ message: "Comment text is required" });
+      return res
+        .status(400)
+        .json({ message: "Le texte du commentaire est obligatoire." });
     }
 
     const now = new Date();
@@ -267,9 +293,13 @@ export const addComment = async (req: Request, res: Response) => {
     await post.save();
 
     const enrichedPost = await enrichPostWithUsers(post.toObject() as any);
-    res.status(200).json({ message: "Comment added successfully", post: enrichedPost });
+    res
+      .status(200)
+      .json({ message: "Commentaire ajouté avec succès.", post: enrichedPost });
   } catch (error) {
-    res.status(500).json({ message: "Error adding comment", error });
+    res
+      .status(500)
+      .json({ message: "Erreur lors de l'ajout du commentaire.", error });
   }
 };
 
@@ -286,7 +316,7 @@ export const deleteComment = async (req: Request, res: Response) => {
     const userId = req.session.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "User not authenticated" });
+      return res.status(401).json({ message: "Utilisateur non authentifié." });
     }
 
     const { id: postId, commentId } = req.params;
@@ -294,19 +324,19 @@ export const deleteComment = async (req: Request, res: Response) => {
     const post = await Post.findById(postId);
 
     if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+      return res.status(404).json({ message: "Post introuvable." });
     }
 
     const comment = post.comments.find((c) => c._id?.toString() === commentId);
 
     if (!comment) {
-      return res.status(404).json({ message: "Comment not found" });
+      return res.status(404).json({ message: "Commentaire introuvable." });
     }
 
     if (comment.commentedBy !== userId && post.createdBy !== userId) {
       return res
         .status(403)
-        .json({ message: "User not authorized to delete this comment" });
+        .json({ message: "Non autorisé à supprimer ce commentaire." });
     }
 
     post.comments = post.comments.filter(
@@ -315,8 +345,18 @@ export const deleteComment = async (req: Request, res: Response) => {
     await post.save();
 
     const enrichedPost = await enrichPostWithUsers(post.toObject() as any);
-    res.status(200).json({ message: "Comment deleted successfully", post: enrichedPost });
+    res
+      .status(200)
+      .json({
+        message: "Commentaire supprimé avec succès.",
+        post: enrichedPost,
+      });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting comment", error });
+    res
+      .status(500)
+      .json({
+        message: "Erreur lors de la suppression du commentaire.",
+        error,
+      });
   }
 };
