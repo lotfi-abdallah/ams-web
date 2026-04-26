@@ -12,14 +12,9 @@ export const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-// Test connection
-pool.on("connect", () => {
-  console.log("✅ Connected to PostgreSQL database");
-});
-
+// Log any errors emitted by the pool to help with debugging connection issues
 pool.on("error", (err) => {
   console.error("❌ Unexpected error on idle PostgreSQL client", err);
-  process.exit(-1);
 });
 
 export const connectDB = async () => {
