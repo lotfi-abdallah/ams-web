@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
+import { SocketService } from '../../services/socket.service';
 import { User } from '../../models';
 
 interface LoginData {
@@ -29,6 +30,7 @@ export class Login {
     private auth: AuthService,
     private router: Router,
     private notification: NotificationService,
+    private socket: SocketService,
   ) {}
 
   onSubmit(event: Event) {
@@ -48,6 +50,7 @@ export class Login {
         this.notification.success(lastCnxMsg, 'Connexion réussie, Bienvenue ' + user.nom + ' !');
 
         this.auth.fetchCurrentUser();
+        this.socket.connect();
         this.router.navigate(['/']);
       },
       error: (error) => {

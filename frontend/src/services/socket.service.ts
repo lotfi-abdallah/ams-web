@@ -1,31 +1,38 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 
+const SOCKET_URL = `${window.location.protocol}//${window.location.hostname}:3189`;
+
 @Injectable({ providedIn: 'root' })
 export class SocketService implements OnDestroy {
-  private socket: Socket = io('https://localhost:3189', {
-    withCredentials: true,
-    transports: ['websocket', 'polling'],
-  });
+  private socket: Socket | null = null;
 
-  ngOnDestroy(): void {
-    this.socket.disconnect();
+  connect(): void {
+    if (this.socket?.connected) return;
+    this.socket = io(SOCKET_URL, {
+      withCredentials: true,
+      transports: ['websocket', 'polling'],
+    });
   }
 
-  /**
-   * Écoute un événement spécifique du serveur et exécute une fonction de rappel lorsque cet événement est reçu.
-   * @param event Le nom de l'événement à écouter.
-   * @param callback La fonction de rappel à exécuter lorsque l'événement est reçu.
-   */
+  disconnect(): void {
+    this.socket?.disconnect();
+    this.socket = null;
+  }
+
+  ngOnDestroy(): void {
+    this.disconnect();
+  }
+
   on<T>(event: string, callback: (data: T) => void): void {
-    this.socket.on(event, callback);
+    this.socket?.on(event, callback);
   }
 
   off(event: string): void {
-    this.socket.off(event);
+    this.socket?.off(event);
   }
 
   emit<T>(event: string, data?: T): void {
-    this.socket.emit(event, data);
+    this.socket?.emit(event, data);
   }
 }
