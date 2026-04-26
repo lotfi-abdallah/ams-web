@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
+import { SocketService } from '../../../services/socket.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -10,13 +11,14 @@ import { Router } from '@angular/router';
 export class Header {
   constructor(
     public auth: AuthService,
+    private socket: SocketService,
     private router: Router,
   ) {}
 
   logout() {
     this.auth.logout().subscribe({
       next: () => {
-        // navigate to / homepage
+        this.socket.disconnect();
         this.router.navigate(['/login']);
       },
       error: (error) => {
