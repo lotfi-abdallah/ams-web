@@ -19,9 +19,7 @@ export class NotificationListenerService {
   start(): void {
     this.socket.on<UserConnectedPayload>('user:connected', (data) => {
       if (data.id === this.auth.user()?.id) return;
-      this.notification.success(
-        `${data.prenom} ${data.nom} vient de se connecter.`,
-      );
+      this.notification.success(`${data.prenom} ${data.nom} vient de se connecter.`);
     });
 
     this.socket.on<UserDisconnectedPayload>('user:disconnected', (data) => {
@@ -35,6 +33,10 @@ export class NotificationListenerService {
 
     this.socket.on<PostNotificationPayload>('post:commented', (data) => {
       this.notification.success(`${data.by.pseudo} a commenté votre post.`);
+    });
+
+    this.socket.on<PostNotificationPayload>('post:shared', (data) => {
+      this.notification.success(`${data.by.pseudo} a partagé votre post.`);
     });
   }
 }

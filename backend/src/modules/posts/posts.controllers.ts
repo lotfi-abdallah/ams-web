@@ -321,19 +321,15 @@ export const sharePost = async (req: Request, res: Response) => {
     const body = rawBody.trim();
 
     if (body.length < 3) {
-      return res
-        .status(400)
-        .json({
-          message: "Le contenu du partage doit contenir au moins 3 caractères.",
-        });
+      return res.status(400).json({
+        message: "Le contenu du partage doit contenir au moins 3 caractères.",
+      });
     }
 
     if (body.length > 300) {
-      return res
-        .status(400)
-        .json({
-          message: "Le contenu du partage ne peut pas dépasser 300 caractères.",
-        });
+      return res.status(400).json({
+        message: "Le contenu du partage ne peut pas dépasser 300 caractères.",
+      });
     }
 
     const originalPost = await Post.findById(id);
@@ -361,6 +357,15 @@ export const sharePost = async (req: Request, res: Response) => {
     const enrichedSharePost = await enrichPostWithUsers(
       savedSharePost.toObject() as any,
     );
+
+    if (originalPost.createdBy !== userId) {
+      getSocket()
+        .to(`user:${originalPost.createdBy}`)
+        .emit("post:shared", {
+          postId: savedSharePost._id.toString(),
+          by: { id: userId, pseudo: req.session.user!.username },
+        });
+    }
 
     res.status(201).json(enrichedSharePost);
   } catch (error) {
