@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Post } from "./posts.model";
 import { enrichPostWithUsers, enrichPostsWithUsers } from "./posts.helpers";
+import { getSocket } from "../../config/socket";
 
 /**
  * @route GET /api/posts
@@ -200,6 +201,15 @@ export const likePost = async (req: Request, res: Response) => {
     post.likes = post.likedBy.length;
     await post.save();
 
+    if (post.createdBy !== userId) {
+      getSocket()
+        .to(`user:${post.createdBy}`)
+        .emit("post:liked", {
+          postId: post._id.toString(),
+          by: { id: userId, pseudo: req.session.user?.username },
+        });
+    }
+
     res.status(200).json({ message: "Post aimé avec succès.", post });
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de l'ajout du like.", error });
@@ -291,6 +301,15 @@ export const addComment = async (req: Request, res: Response) => {
 
     post.comments.push(newComment);
     await post.save();
+
+    if (post.createdBy !== userId) {
+      getSocket()
+        .to(`user:${post.createdBy}`)
+        .emit("post:commented", {
+          postId: post._id.toString(),
+          by: { id: userId, pseudo: req.session.user?.username },
+        });
+    }
 
     const enrichedPost = await enrichPostWithUsers(post.toObject() as any);
     res

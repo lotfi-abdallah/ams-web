@@ -48,6 +48,13 @@ export function initSocket(
     socket.data.user = request.session.user;
     return next();
   });
+
+  io.on("connection", (socket) => {
+    const userId = socket.data.user?.id;
+    if (userId) {
+      socket.join(`user:${userId}`);
+    }
+  });
 }
 
 export function getSocket() {
