@@ -34,7 +34,9 @@ export class App implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.auth.fetchCurrentUser();
+    this.auth.fetchCurrentUser().subscribe({
+      next: () => this.socket.connect(),
+    });
 
     this.socket.on<UserConnectedPayload>('user:connected', (data) => {
       if (data.id === this.auth.user()?.id) return;

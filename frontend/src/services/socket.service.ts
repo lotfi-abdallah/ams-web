@@ -1,11 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_URL = `${window.location.protocol}//${window.location.hostname}:3189`;
+const SOCKET_URL = `https://${window.location.hostname}:3189`;
 
 @Injectable({ providedIn: 'root' })
 export class SocketService implements OnDestroy {
   private socket: Socket | null = null;
+  private listeners = new Map<string, Set<(data: any) => void>>();
 
   connect(): void {
     if (this.socket?.connected) return;
@@ -13,6 +14,9 @@ export class SocketService implements OnDestroy {
       withCredentials: true,
       transports: ['websocket', 'polling'],
     });
+    for (const [event, callbacks] of this.listeners) {
+      for (const cb of callbacks) this.socket.on(event, cb);
+    }
   }
 
   disconnect(): void {
@@ -25,10 +29,17 @@ export class SocketService implements OnDestroy {
   }
 
   on<T>(event: string, callback: (data: T) => void): void {
+    let set = this.listeners.get(event);
+    if (!set) {
+      set = new Set();
+      this.listeners.set(event, set);
+    }
+    set.add(callback as (data: any) => void);
     this.socket?.on(event, callback);
   }
 
   off(event: string): void {
+    this.listeners.delete(event);
     this.socket?.off(event);
   }
 

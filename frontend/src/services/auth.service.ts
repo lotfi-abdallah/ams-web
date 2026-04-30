@@ -19,10 +19,12 @@ export class AuthService {
   }
 
   fetchCurrentUser() {
-    return this.api.get('auth/me').subscribe({
-      next: (response: any) => this._user.set(response.user),
-      error: () => this._user.set(null),
-    });
+    return this.api.get('auth/me').pipe(
+      tap({
+        next: (response: any) => this._user.set(response.user),
+        error: () => this._user.set(null),
+      }),
+    );
   }
 
   saveLatestConnection(id: number) {

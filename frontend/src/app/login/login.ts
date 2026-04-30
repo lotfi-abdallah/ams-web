@@ -49,7 +49,7 @@ export class Login {
           : 'Première connexion !';
         this.notification.success(lastCnxMsg, 'Connexion réussie, Bienvenue ' + user.nom + ' !');
 
-        this.auth.fetchCurrentUser();
+        this.auth.fetchCurrentUser().subscribe();
         this.socket.connect();
         this.router.navigate(['/']);
       },
