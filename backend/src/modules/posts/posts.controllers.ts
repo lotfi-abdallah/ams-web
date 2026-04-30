@@ -323,6 +323,69 @@ export const addComment = async (req: Request, res: Response) => {
 };
 
 /**
+ * @route POST /api/posts/:id/share
+ * Partager un post existant en créant un nouveau post qui référence l'original
+ * - id: ID du post original à partager
+ * - body: texte du nouveau post (3 à 300 caractères)
+ *
+ * Réponse: Détails du nouveau post de partage ou message d'erreur
+ */
+export const sharePost = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Utilisateur non authentifié." });
+    }
+
+    const rawBody = typeof req.body?.body === "string" ? req.body.body : "";
+    const body = rawBody.trim();
+
+    if (body.length < 3) {
+      return res
+        .status(400)
+        .json({ message: "Le contenu du partage doit contenir au moins 3 caractères." });
+    }
+
+    if (body.length > 300) {
+      return res
+        .status(400)
+        .json({ message: "Le contenu du partage ne peut pas dépasser 300 caractères." });
+    }
+
+    const originalPost = await Post.findById(id);
+
+    if (!originalPost) {
+      return res.status(404).json({ message: "Post original introuvable." });
+    }
+
+    if (originalPost.shared) {
+      return res
+        .status(400)
+        .json({ message: "Impossible de partager un post déjà partagé." });
+    }
+
+    const sharePost = new Post({
+      body,
+      createdBy: userId,
+      shared: originalPost._id,
+      likes: 0,
+      likedBy: [],
+      comments: [],
+      hashtags: [],
+    });
+    const savedSharePost = await sharePost.save();
+
+    res.status(201).json(savedSharePost);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Erreur lors du partage du post.", error });
+  }
+};
+
+/**
  * @route DELETE /api/posts/:id/comment/:commentId
  * Supprimer un commentaire d'un post
  * - id: ID du post contenant le commentaire
