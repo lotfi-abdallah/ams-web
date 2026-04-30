@@ -141,6 +141,81 @@ export class PostInteractionFacade {
     );
   }
 
+  updatePost(
+    post: PostModel,
+    payload: {
+      body: string;
+      imageUrl?: string;
+      imageTitle?: string;
+      hashtags?: string[];
+    },
+  ): Observable<PostModel> {
+    const postId = post._id;
+    if (!postId) {
+      return EMPTY;
+    }
+
+    const userId = this.getCurrentUserId();
+    if (userId === null) {
+      this.notification.error('Veuillez vous connecter pour modifier une publication.');
+      return EMPTY;
+    }
+
+    if (post.createdBy !== userId) {
+      this.notification.error("Vous n'etes pas autorise a modifier ce post.");
+      return EMPTY;
+    }
+
+    const trimmedBody = payload.body.trim();
+    if (!trimmedBody) {
+      this.notification.error('Le contenu du post est obligatoire.');
+      return EMPTY;
+    }
+
+    if (trimmedBody.length > 300) {
+      this.notification.error('Le contenu du post ne peut pas depasser 300 caracteres.');
+      return EMPTY;
+    }
+
+    return this.postsService
+      .updatePost(postId, {
+        ...payload,
+        body: trimmedBody,
+      })
+      .pipe(
+        catchError((error) => {
+          this.notification.error('Impossible de modifier cette publication.');
+          return throwError(() => error);
+        }),
+      );
+  }
+
+  deletePost(post: PostModel): Observable<void> {
+    const postId = post._id;
+    if (!postId) {
+      return EMPTY;
+    }
+
+    const userId = this.getCurrentUserId();
+    if (userId === null) {
+      this.notification.error('Veuillez vous connecter pour supprimer une publication.');
+      return EMPTY;
+    }
+
+    if (post.createdBy !== userId) {
+      this.notification.error("Vous n'etes pas autorise a supprimer ce post.");
+      return EMPTY;
+    }
+
+    return this.postsService.deletePost(postId).pipe(
+      map(() => undefined),
+      catchError((error) => {
+        this.notification.error('Impossible de supprimer cette publication.');
+        return throwError(() => error);
+      }),
+    );
+  }
+
   private getCurrentUserId(): number | null {
     const currentUser = this.authService.user() as { id?: number } | null;
     return typeof currentUser?.id === 'number' ? currentUser.id : null;

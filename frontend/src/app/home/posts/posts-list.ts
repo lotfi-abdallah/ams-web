@@ -43,6 +43,10 @@ export class PostsList implements OnInit {
           return [newPost, ...currentPosts];
         });
       });
+
+    this.postsService.removePost$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((postId) => {
+      this.posts.update((currentPosts) => currentPosts.filter((post) => post._id !== postId));
+    });
   }
 
   onFilterChanged(filter: PostsFilter): void {

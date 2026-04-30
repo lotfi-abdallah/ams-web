@@ -1,0 +1,82 @@
+<form (ngSubmit)="onSubmit()" class="mb-3 border border-hn-border rounded bg-hn-bg p-3 space-y-3">
+  <div>
+    <label for="editBody" class="block text-xs font-medium text-hn-text mb-1">Contenu</label>
+    <textarea
+      id="editBody"
+      name="editBody"
+      [ngModel]="body()"
+      (ngModelChange)="onBodyChange($event)"
+      rows="3"
+      [disabled]="isSubmitting()"
+      class="w-full rounded border border-hn-border bg-hn-bg px-3 py-2 text-sm text-hn-text focus:outline-none focus:ring-2 focus:ring-hn-orange"
+    ></textarea>
+  </div>
+
+  <div>
+    <label for="editImageUrl" class="block text-xs font-medium text-hn-text mb-1">
+      Image URL
+    </label>
+    <input
+      id="editImageUrl"
+      name="editImageUrl"
+      [ngModel]="imageUrl()"
+      (ngModelChange)="onImageUrlChange($event)"
+      type="text"
+      [disabled]="isSubmitting()"
+      class="w-full rounded border border-hn-border bg-hn-bg px-3 py-2 text-sm text-hn-text focus:outline-none focus:ring-2 focus:ring-hn-orange"
+      placeholder="https://example.com/image.jpg"
+    />
+  </div>
+
+  <div>
+    <label for="editImageTitle" class="block text-xs font-medium text-hn-text mb-1">
+      Image titre
+    </label>
+    <input
+      id="editImageTitle"
+      name="editImageTitle"
+      [ngModel]="imageTitle()"
+      (ngModelChange)="onImageTitleChange($event)"
+      type="text"
+      [disabled]="isSubmitting()"
+      class="w-full rounded border border-hn-border bg-hn-bg px-3 py-2 text-sm text-hn-text focus:outline-none focus:ring-2 focus:ring-hn-orange"
+      placeholder="Au studio !"
+    />
+  </div>
+
+  <div>
+    <label for="editHashtags" class="block text-xs font-medium text-hn-text mb-1"> Hashtags </label>
+    <input
+      id="editHashtags"
+      name="editHashtags"
+      [ngModel]="hashtags()"
+      (ngModelChange)="onHashtagsChange($event)"
+      type="text"
+      [disabled]="isSubmitting()"
+      class="w-full rounded border border-hn-border bg-hn-bg px-3 py-2 text-sm text-hn-text focus:outline-none focus:ring-2 focus:ring-hn-orange"
+      placeholder="#ceri, #angular, #ams"
+    />
+    <p class="mt-1 text-xs text-hn-muted">Séparez les hashtags par des virgules.</p>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="text-xs text-red-600">{{ errorMessage() }}</p>
+  }
+
+  <div class="flex items-center justify-end gap-2">
+    <button
+      type="button"
+      (click)="onCancel()"
+      class="px-3 py-1.5 text-sm rounded border border-hn-border bg-hn-surface text-hn-text hover:bg-hn-bg"
+    >
+      Annuler
+    </button>
+    <button
+      type="submit"
+      [disabled]="isSubmitting() || !body().trim()"
+      class="px-3 py-1.5 text-sm rounded border border-hn-border bg-hn-surface text-hn-text hover:bg-hn-bg disabled:opacity-60 disabled:cursor-not-allowed"
+    >
+      {{ isSubmitting() ? 'Enregistrement...' : 'Enregistrer' }}
+    </button>
+  </div>
+</form>

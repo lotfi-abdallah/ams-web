@@ -1,0 +1,32 @@
+<form (ngSubmit)="onSubmit()" class="mt-3 border border-hn-border rounded bg-hn-bg p-3 space-y-2">
+  <textarea
+    name="shareText"
+    [ngModel]="body()"
+    (ngModelChange)="onBodyChange($event)"
+    (keydown.control.enter)="onSubmit()"
+    rows="2"
+    minlength="3"
+    placeholder="Ajouter un message... (Ctrl+Entrée pour partager)"
+    [disabled]="isSubmitting()"
+    class="w-full text-sm rounded border border-hn-border bg-hn-bg text-hn-text px-3 py-2 resize-none placeholder:text-hn-muted focus:outline-none focus:border-hn-orange"
+  ></textarea>
+  @if (errorMessage()) {
+    <p class="text-xs text-red-600">{{ errorMessage() }}</p>
+  }
+  <div class="flex items-center justify-end gap-2">
+    <button
+      type="button"
+      (click)="onCancel()"
+      class="px-3 py-1.5 text-sm rounded border border-hn-border bg-hn-surface text-hn-text hover:bg-hn-bg"
+    >
+      Annuler
+    </button>
+    <button
+      type="submit"
+      [disabled]="isSubmitting() || body().trim().length < 3"
+      class="px-3 py-1.5 text-sm rounded border border-hn-border bg-hn-surface text-hn-text hover:bg-hn-bg disabled:opacity-60 disabled:cursor-not-allowed"
+    >
+      {{ isSubmitting() ? 'Partage...' : 'Partager' }}
+    </button>
+  </div>
+</form>

@@ -30,6 +30,8 @@ export class PostsService {
   refreshTimeline$ = this.refreshTimelineSubject.asObservable();
   private prependPostSubject = new Subject<Post>();
   prependPost$ = this.prependPostSubject.asObservable();
+  private removePostSubject = new Subject<string>();
+  removePost$ = this.removePostSubject.asObservable();
 
   constructor(private api: ApiService) {}
 
@@ -87,11 +89,31 @@ export class PostsService {
     return this.api.post<Post>(`posts/${postId}/share`, { body });
   }
 
+  updatePost(
+    postId: string,
+    postData: {
+      body: string;
+      imageUrl?: string;
+      imageTitle?: string;
+      hashtags?: string[];
+    },
+  ): Observable<Post> {
+    return this.api.put<Post>(`posts/${postId}`, postData);
+  }
+
+  deletePost(postId: string): Observable<{ message: string; postId: string }> {
+    return this.api.delete<{ message: string; postId: string }>(`posts/${postId}`);
+  }
+
   notifyTimelineRefresh() {
     this.refreshTimelineSubject.next();
   }
 
   prependPostToTimeline(post: Post) {
     this.prependPostSubject.next(post);
+  }
+
+  removePostFromTimeline(postId: string) {
+    this.removePostSubject.next(postId);
   }
 }

@@ -8,12 +8,23 @@ import { PostBody } from './components/post-body/post-body';
 import { PostActions } from './components/post-actions/post-actions';
 import { PostComments } from './components/post-comments/post-comments';
 import { PostShared } from './components/post-shared/post-shared';
+import { PostEditForm } from './components/post-edit/post-edit';
+import { PostShareForm } from './components/post-share/post-share';
 import { NotificationService } from '../../../services/notification.service';
 import { PostsService } from '../../../services/posts.service';
 
 @Component({
   selector: 'app-post',
-  imports: [FormsModule, PostHeader, PostBody, PostActions, PostComments, PostShared],
+  imports: [
+    FormsModule,
+    PostHeader,
+    PostBody,
+    PostActions,
+    PostComments,
+    PostShared,
+    PostEditForm,
+    PostShareForm,
+  ],
   templateUrl: './post.html',
 })
 export class PostCard {
@@ -26,6 +37,14 @@ export class PostCard {
   shareError = signal('');
   isShareSubmitting = signal(false);
   shareText = '';
+  isEditing = signal(false);
+  editError = signal('');
+  isEditSubmitting = signal(false);
+  editBody = '';
+  editImageUrl = '';
+  editImageTitle = '';
+  editHashtags = '';
+  isDeleteSubmitting = signal(false);
 
   post(): PostModel {
     return this.localPost() ?? this.postInput();
@@ -64,6 +83,125 @@ export class PostCard {
   cancelShare() {
     this.showShareForm.set(false);
     this.resetShareForm();
+  }
+
+  canManagePost(): boolean {
+    const userId = this.postInteraction.getCurrentUserIdValue();
+    return userId !== null && userId === this.post().createdBy;
+  }
+
+  startEdit() {
+    if (!this.canManagePost()) {
+      return;
+    }
+
+    this.showShareForm.set(false);
+    this.resetShareForm();
+    this.isEditing.set(true);
+    this.editError.set('');
+
+    const currentPost = this.post();
+    this.editBody = currentPost.body ?? '';
+    this.editImageUrl = currentPost.images?.url ?? '';
+    this.editImageTitle = currentPost.images?.title ?? '';
+    this.editHashtags = (currentPost.hashtags ?? []).join(', ');
+  }
+
+  cancelEdit() {
+    this.isEditing.set(false);
+    this.resetEditForm();
+  }
+
+  submitEdit() {
+    if (this.isEditSubmitting()) {
+      return;
+    }
+
+    if (!this.canManagePost()) {
+      const message = "Vous n'etes pas autorise a modifier ce post.";
+      this.editError.set(message);
+      this.notification.error(message);
+      return;
+    }
+
+    const trimmedBody = this.editBody.trim();
+    if (!trimmedBody) {
+      this.editError.set('Le contenu du post est obligatoire.');
+      return;
+    }
+
+    if (trimmedBody.length > 300) {
+      this.editError.set('Le contenu du post ne peut pas depasser 300 caracteres.');
+      return;
+    }
+
+    const trimmedImageUrl = this.editImageUrl.trim();
+    const trimmedImageTitle = this.editImageTitle.trim();
+    if ((trimmedImageUrl && !trimmedImageTitle) || (!trimmedImageUrl && trimmedImageTitle)) {
+      this.editError.set("Renseignez l'URL et le titre de l'image ensemble.");
+      return;
+    }
+
+    const normalizedHashtags = this.editHashtags
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+    const uniqueHashtags = [...new Set(normalizedHashtags)];
+
+    this.isEditSubmitting.set(true);
+    this.editError.set('');
+
+    this.postInteraction
+      .updatePost(this.post(), {
+        body: trimmedBody,
+        imageUrl: trimmedImageUrl || undefined,
+        imageTitle: trimmedImageTitle || undefined,
+        hashtags: uniqueHashtags,
+      })
+      .pipe(finalize(() => this.isEditSubmitting.set(false)))
+      .subscribe({
+        next: (updatedPost) => {
+          this.onPostUpdated(updatedPost);
+          this.isEditing.set(false);
+          this.resetEditForm();
+        },
+        error: (error) => {
+          const message = error?.error?.message ?? 'Impossible de modifier cette publication.';
+          this.editError.set(message);
+        },
+      });
+  }
+
+  confirmDelete() {
+    if (this.isDeleteSubmitting()) {
+      return;
+    }
+
+    if (!this.canManagePost()) {
+      const message = "Vous n'etes pas autorise a supprimer ce post.";
+      this.notification.error(message);
+      return;
+    }
+
+    const confirmed = window.confirm('Supprimer cette publication ?');
+    if (!confirmed) {
+      return;
+    }
+
+    this.isDeleteSubmitting.set(true);
+
+    this.postInteraction
+      .deletePost(this.post())
+      .pipe(finalize(() => this.isDeleteSubmitting.set(false)))
+      .subscribe({
+        next: () => {
+          const postId = this.post()._id;
+          if (postId) {
+            this.postsService.removePostFromTimeline(postId);
+          }
+        },
+        error: () => undefined,
+      });
   }
 
   submitShare() {
@@ -132,5 +270,14 @@ export class PostCard {
     this.shareText = '';
     this.shareError.set('');
     this.isShareSubmitting.set(false);
+  }
+
+  private resetEditForm() {
+    this.editBody = '';
+    this.editImageUrl = '';
+    this.editImageTitle = '';
+    this.editHashtags = '';
+    this.editError.set('');
+    this.isEditSubmitting.set(false);
   }
 }

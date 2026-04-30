@@ -174,6 +174,125 @@ export const createPost = async (req: Request, res: Response) => {
 };
 
 /**
+ * @route PUT /api/posts/:id
+ * Mettre a jour un post existant
+ * - id: ID du post a mettre a jour
+ * - body: contenu du post (obligatoire)
+ * - imageUrl: URL de l'image (optionnel)
+ * - imageTitle: titre de l'image (optionnel)
+ * - hashtags: liste de hashtags (optionnel)
+ *
+ * Réponse: Détails du post mis a jour ou message d'erreur
+ */
+export const updatePost = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { body, imageUrl, imageTitle, hashtags } = req.body;
+    const userId = req.session.user!.id;
+
+    const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post introuvable." });
+    }
+
+    if (post.createdBy !== userId) {
+      return res
+        .status(403)
+        .json({ message: "Non autorise a modifier ce post." });
+    }
+
+    if (!body || typeof body !== "string" || !body.trim()) {
+      return res
+        .status(400)
+        .json({ message: "Le contenu du post est obligatoire." });
+    }
+
+    if (body.length > 300) {
+      return res.status(400).json({
+        message: "Le contenu du post ne peut pas dépasser 300 caractères.",
+      });
+    }
+
+    const normalizedImageUrl =
+      typeof imageUrl === "string" ? imageUrl.trim() : "";
+    const normalizedImageTitle =
+      typeof imageTitle === "string" ? imageTitle.trim() : "";
+
+    if (
+      (normalizedImageUrl && !normalizedImageTitle) ||
+      (!normalizedImageUrl && normalizedImageTitle)
+    ) {
+      return res.status(400).json({
+        message: "Renseignez l'URL et le titre de l'image ensemble.",
+      });
+    }
+
+    const normalizedHashtags = Array.isArray(hashtags)
+      ? hashtags
+          .filter((tag): tag is string => typeof tag === "string")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag.length > 0)
+      : undefined;
+
+    post.body = body.trim();
+    if (normalizedHashtags) {
+      post.hashtags = [...new Set(normalizedHashtags)];
+    }
+    post.images =
+      normalizedImageUrl && normalizedImageTitle
+        ? { url: normalizedImageUrl, title: normalizedImageTitle }
+        : undefined;
+
+    await post.save();
+
+    const enrichedPost = await enrichPostWithUsers(post.toObject() as any);
+    res.status(200).json(enrichedPost);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la mise a jour du post.", error });
+  }
+};
+
+/**
+ * @route DELETE /api/posts/:id
+ * Supprimer un post existant
+ * - id: ID du post a supprimer
+ *
+ * Réponse: Message de succes ou d'erreur
+ */
+export const deletePost = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user!.id;
+
+    const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post introuvable." });
+    }
+
+    if (post.createdBy !== userId) {
+      return res
+        .status(403)
+        .json({ message: "Non autorise a supprimer ce post." });
+    }
+
+    await post.deleteOne();
+
+    res.status(200).json({
+      message: "Post supprime avec succes.",
+      postId: post._id.toString(),
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la suppression du post.", error });
+  }
+};
+
+/**
  * @route POST /api/posts/:id/like
  * Aimer un post
  * - id: ID du post à aimer
