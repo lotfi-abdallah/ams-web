@@ -18,6 +18,11 @@ interface UserDisconnectedPayload {
   pseudo: string;
 }
 
+interface PostNotificationPayload {
+  postId: string;
+  by: { id: number; pseudo: string };
+}
+
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, Header],
@@ -49,10 +54,20 @@ export class App implements OnInit, OnDestroy {
       if (data.id === this.auth.user()?.id) return;
       this.notification.error(`${data.pseudo} vient de se déconnecter.`);
     });
+
+    this.socket.on<PostNotificationPayload>('post:liked', (data) => {
+      this.notification.success(`${data.by.pseudo} a aimé votre post.`);
+    });
+
+    this.socket.on<PostNotificationPayload>('post:commented', (data) => {
+      this.notification.success(`${data.by.pseudo} a commenté votre post.`);
+    });
   }
 
   ngOnDestroy(): void {
     this.socket.off('user:connected');
     this.socket.off('user:disconnected');
+    this.socket.off('post:liked');
+    this.socket.off('post:commented');
   }
 }
