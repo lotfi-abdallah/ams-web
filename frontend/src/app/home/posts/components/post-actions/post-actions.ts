@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { LucideDynamicIcon, LucideHeart, LucideMessageCircle } from '@lucide/angular';
+import { LucideDynamicIcon, LucideHeart, LucideMessageCircle, LucideShare2 } from '@lucide/angular';
 import { Post as PostModel } from '../../../../../models';
 
 @Component({
@@ -14,9 +14,11 @@ export class PostActions {
   isCommentsOpen = input.required<boolean>();
   toggleLike = output<void>();
   toggleComments = output<void>();
+  shareClicked = output<void>();
 
   readonly heartIcon = LucideHeart;
   readonly commentIcon = LucideMessageCircle;
+  readonly shareIcon = LucideShare2;
 
   onToggleLike() {
     this.toggleLike.emit();
@@ -24,5 +26,9 @@ export class PostActions {
 
   onToggleComments() {
     this.toggleComments.emit();
+  }
+
+  onShareClicked() {
+    this.shareClicked.emit();
   }
 }

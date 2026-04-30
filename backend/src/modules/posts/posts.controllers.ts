@@ -116,11 +116,9 @@ export const createPost = async (req: Request, res: Response) => {
     }
 
     if (body.length > 300) {
-      return res
-        .status(400)
-        .json({
-          message: "Le contenu du post ne peut pas dépasser 300 caractères.",
-        });
+      return res.status(400).json({
+        message: "Le contenu du post ne peut pas dépasser 300 caractères.",
+      });
     }
 
     const normalizedHashtags = Array.isArray(hashtags)
@@ -325,13 +323,17 @@ export const sharePost = async (req: Request, res: Response) => {
     if (body.length < 3) {
       return res
         .status(400)
-        .json({ message: "Le contenu du partage doit contenir au moins 3 caractères." });
+        .json({
+          message: "Le contenu du partage doit contenir au moins 3 caractères.",
+        });
     }
 
     if (body.length > 300) {
       return res
         .status(400)
-        .json({ message: "Le contenu du partage ne peut pas dépasser 300 caractères." });
+        .json({
+          message: "Le contenu du partage ne peut pas dépasser 300 caractères.",
+        });
     }
 
     const originalPost = await Post.findById(id);
@@ -356,12 +358,13 @@ export const sharePost = async (req: Request, res: Response) => {
       hashtags: [],
     });
     const savedSharePost = await sharePost.save();
+    const enrichedSharePost = await enrichPostWithUsers(
+      savedSharePost.toObject() as any,
+    );
 
-    res.status(201).json(savedSharePost);
+    res.status(201).json(enrichedSharePost);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Erreur lors du partage du post.", error });
+    res.status(500).json({ message: "Erreur lors du partage du post.", error });
   }
 };
 
@@ -403,18 +406,14 @@ export const deleteComment = async (req: Request, res: Response) => {
     await post.save();
 
     const enrichedPost = await enrichPostWithUsers(post.toObject() as any);
-    res
-      .status(200)
-      .json({
-        message: "Commentaire supprimé avec succès.",
-        post: enrichedPost,
-      });
+    res.status(200).json({
+      message: "Commentaire supprimé avec succès.",
+      post: enrichedPost,
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Erreur lors de la suppression du commentaire.",
-        error,
-      });
+    res.status(500).json({
+      message: "Erreur lors de la suppression du commentaire.",
+      error,
+    });
   }
 };

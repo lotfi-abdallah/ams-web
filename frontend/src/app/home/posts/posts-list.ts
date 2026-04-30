@@ -32,6 +32,17 @@ export class PostsList implements OnInit {
     this.postsService.refreshTimeline$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.reloadPosts());
+
+    this.postsService.prependPost$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((newPost) => {
+        this.posts.update((currentPosts) => {
+          if (newPost._id && currentPosts.some((post) => post._id === newPost._id)) {
+            return currentPosts;
+          }
+          return [newPost, ...currentPosts];
+        });
+      });
   }
 
   onFilterChanged(filter: PostsFilter): void {

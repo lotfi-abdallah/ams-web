@@ -27,14 +27,20 @@ export interface PaginatedPostsResponse {
 export class PostsService {
   private refreshTimelineSubject = new Subject<void>();
   refreshTimeline$ = this.refreshTimelineSubject.asObservable();
+  private prependPostSubject = new Subject<Post>();
+  prependPost$ = this.prependPostSubject.asObservable();
 
   constructor(private api: ApiService) {}
 
-  getPostsPage(page: number, limit: number, filter: PostsFilter = {}): Observable<PaginatedPostsResponse> {
+  getPostsPage(
+    page: number,
+    limit: number,
+    filter: PostsFilter = {},
+  ): Observable<PaginatedPostsResponse> {
     const params = new URLSearchParams({ page: String(page), limit: String(limit) });
-    if (filter.sort)    params.set('sort', filter.sort);
+    if (filter.sort) params.set('sort', filter.sort);
     if (filter.hashtag) params.set('hashtag', filter.hashtag);
-    if (filter.author)  params.set('author', String(filter.author));
+    if (filter.author) params.set('author', String(filter.author));
     return this.api.get<PaginatedPostsResponse>(`posts?${params.toString()}`);
   }
 
@@ -81,5 +87,9 @@ export class PostsService {
 
   notifyTimelineRefresh() {
     this.refreshTimelineSubject.next();
+  }
+
+  prependPostToTimeline(post: Post) {
+    this.prependPostSubject.next(post);
   }
 }

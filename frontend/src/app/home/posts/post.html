@@ -20,7 +20,45 @@
       [isCommentsOpen]="isCommentsOpen()"
       (toggleLike)="toggleLike()"
       (toggleComments)="toggleComments()"
+      (shareClicked)="toggleShareForm()"
     />
+
+    @if (showShareForm()) {
+      <form
+        (ngSubmit)="submitShare()"
+        class="mt-3 border border-hn-border rounded bg-hn-bg p-3 space-y-2"
+      >
+        <textarea
+          name="shareText"
+          [(ngModel)]="shareText"
+          (keydown.control.enter)="submitShare()"
+          rows="2"
+          minlength="3"
+          placeholder="Ajouter un message... (Ctrl+Entrée pour partager)"
+          [disabled]="isShareSubmitting()"
+          class="w-full text-sm rounded border border-hn-border bg-hn-bg text-hn-text px-3 py-2 resize-none placeholder:text-hn-muted focus:outline-none focus:border-hn-orange"
+        ></textarea>
+        @if (shareError()) {
+          <p class="text-xs text-red-600">{{ shareError() }}</p>
+        }
+        <div class="flex items-center justify-end gap-2">
+          <button
+            type="button"
+            (click)="cancelShare()"
+            class="px-3 py-1.5 text-sm rounded border border-hn-border bg-hn-surface text-hn-text hover:bg-hn-bg"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            [disabled]="isShareSubmitting() || shareText.trim().length < 3"
+            class="px-3 py-1.5 text-sm rounded border border-hn-border bg-hn-surface text-hn-text hover:bg-hn-bg disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {{ isShareSubmitting() ? 'Partage...' : 'Partager' }}
+          </button>
+        </div>
+      </form>
+    }
 
     @if (isCommentsOpen()) {
       <app-post-comments [post]="post()" (postUpdated)="onPostUpdated($event)" />

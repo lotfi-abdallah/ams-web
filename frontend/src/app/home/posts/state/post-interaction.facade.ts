@@ -116,6 +116,31 @@ export class PostInteractionFacade {
     );
   }
 
+  sharePost(postId: string | undefined, body: string): Observable<PostModel> {
+    if (!postId) {
+      return EMPTY;
+    }
+
+    const userId = this.getCurrentUserId();
+    if (userId === null) {
+      this.notification.error('Veuillez vous connecter pour partager une publication.');
+      return EMPTY;
+    }
+
+    const trimmedBody = body.trim();
+    if (trimmedBody.length < 3) {
+      this.notification.error('Le message doit contenir au moins 3 caracteres.');
+      return EMPTY;
+    }
+
+    return this.postsService.sharePost(postId, trimmedBody).pipe(
+      catchError((error) => {
+        this.notification.error('Impossible de partager cette publication.');
+        return throwError(() => error);
+      }),
+    );
+  }
+
   private getCurrentUserId(): number | null {
     const currentUser = this.authService.user() as { id?: number } | null;
     return typeof currentUser?.id === 'number' ? currentUser.id : null;
