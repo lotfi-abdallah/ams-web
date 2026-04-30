@@ -34,8 +34,9 @@
       <textarea
         name="commentText"
         [(ngModel)]="commentText"
+        (keydown.control.enter)="submitComment()"
         rows="2"
-        placeholder="Écrire un commentaire..."
+        placeholder="Écrire un commentaire... (Ctrl+Entrée pour envoyer)"
         [disabled]="isSubmitting"
         class="flex-1 text-sm rounded border border-hn-border bg-hn-bg text-hn-text px-3 py-2 resize-none placeholder:text-hn-muted focus:outline-none focus:border-hn-orange"
       ></textarea>
