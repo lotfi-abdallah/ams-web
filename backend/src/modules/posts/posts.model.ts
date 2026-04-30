@@ -23,6 +23,7 @@ interface IPost extends Document {
   likedBy: number[];
   hashtags: string[];
   comments: Comment[];
+  shared?: Schema.Types.ObjectId | null;
 }
 
 const getCurrentDate = () => new Date().toISOString().slice(0, 10);
@@ -60,6 +61,7 @@ const postSchema = new Schema<IPost>(
     likedBy: { type: [Number], default: [] },
     hashtags: { type: [String], default: [] },
     comments: { type: [commentSchema], default: [] },
+    shared: { type: Schema.Types.ObjectId, ref: "Post", default: null },
   },
   { timestamps: false },
 );
