@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { ApiService } from './api.service';
+import { SocketService } from './socket.service';
 import { tap } from 'rxjs';
 import { User } from '../models';
 
@@ -8,7 +9,16 @@ export class AuthService {
   private _user = signal<User | null>(null);
   readonly user = this._user.asReadonly();
 
-  constructor(private api: ApiService) {}
+  constructor(
+    private api: ApiService,
+    private socket: SocketService,
+  ) {}
+
+  bootstrap(): void {
+    this.fetchCurrentUser().subscribe({
+      next: () => this.socket.connect(),
+    });
+  }
 
   setUser(user: User | null) {
     this._user.set(user);
