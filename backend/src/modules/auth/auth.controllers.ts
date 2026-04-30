@@ -61,12 +61,8 @@ export const loginUser = async (req: Request, res: Response) => {
 };
 
 export const logoutUser = async (req: Request, res: Response) => {
-  if (!req.session || !req.session.user || !req.session.user.id) {
-    return res.status(401).json({ message: "Non authentifié." });
-  }
-
-  const userId = req.session.user.id;
-  const pseudo = req.session.user.username;
+  const userId = req.session.user!.id;
+  const pseudo = req.session.user!.username;
 
   try {
     const isUpdated = await updateConnectionStatus(userId, 0);
@@ -95,9 +91,5 @@ export const logoutUser = async (req: Request, res: Response) => {
 };
 
 export const getMe = (req: Request, res: Response) => {
-  if (!req.session || !req.session.user) {
-    return res.status(401).json({ message: "Non authentifié." });
-  }
-
   return res.status(200).json({ user: req.session.user });
 };

@@ -9,16 +9,17 @@ import {
   deleteComment,
   sharePost,
 } from "./posts.controllers";
+import { requireAuth } from "../../middlewares/auth.middleware";
 
 const router = Router();
 
 router.get("/", getPosts);
 router.get("/:id", getPostById);
-router.post("/", createPost);
-router.post("/:id/like", likePost);
-router.post("/:id/unlike", unlikePost);
-router.post("/:id/comment", addComment);
-router.delete("/:id/comment/:commentId", deleteComment);
-router.post("/:id/share", sharePost);
+router.post("/", requireAuth, createPost);
+router.post("/:id/like", requireAuth, likePost);
+router.post("/:id/unlike", requireAuth, unlikePost);
+router.post("/:id/comment", requireAuth, addComment);
+router.delete("/:id/comment/:commentId", requireAuth, deleteComment);
+router.post("/:id/share", requireAuth, sharePost);
 
 export default router;

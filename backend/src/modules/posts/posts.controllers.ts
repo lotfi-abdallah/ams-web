@@ -107,11 +107,7 @@ export const getPostById = async (req: Request, res: Response) => {
 export const createPost = async (req: Request, res: Response) => {
   try {
     const { body, imageUrl, imageTitle, hashtags } = req.body;
-    const userId = req.session.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({ message: "Utilisateur non authentifié." });
-    }
+    const userId = req.session.user!.id;
 
     if (!body || typeof body !== "string" || !body.trim()) {
       return res
@@ -185,11 +181,7 @@ export const likePost = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Post introuvable." });
     }
 
-    const userId = req.session.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({ message: "Utilisateur non authentifié." });
-    }
+    const userId = req.session.user!.id;
 
     if (post.likedBy.includes(userId)) {
       return res
@@ -206,7 +198,7 @@ export const likePost = async (req: Request, res: Response) => {
         .to(`user:${post.createdBy}`)
         .emit("post:liked", {
           postId: post._id.toString(),
-          by: { id: userId, pseudo: req.session.user?.username },
+          by: { id: userId, pseudo: req.session.user!.username },
         });
     }
 
@@ -232,11 +224,7 @@ export const unlikePost = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Post introuvable." });
     }
 
-    const userId = req.session.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({ message: "Utilisateur non authentifié." });
-    }
+    const userId = req.session.user!.id;
 
     if (!post.likedBy.includes(userId)) {
       return res
@@ -274,11 +262,7 @@ export const addComment = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Post introuvable." });
     }
 
-    const userId = req.session.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({ message: "Utilisateur non authentifié." });
-    }
+    const userId = req.session.user!.id;
 
     if (!text) {
       return res
@@ -307,7 +291,7 @@ export const addComment = async (req: Request, res: Response) => {
         .to(`user:${post.createdBy}`)
         .emit("post:commented", {
           postId: post._id.toString(),
-          by: { id: userId, pseudo: req.session.user?.username },
+          by: { id: userId, pseudo: req.session.user!.username },
         });
     }
 
@@ -333,11 +317,7 @@ export const addComment = async (req: Request, res: Response) => {
 export const sharePost = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = req.session.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({ message: "Utilisateur non authentifié." });
-    }
+    const userId = req.session.user!.id;
 
     const rawBody = typeof req.body?.body === "string" ? req.body.body : "";
     const body = rawBody.trim();
@@ -395,11 +375,7 @@ export const sharePost = async (req: Request, res: Response) => {
  */
 export const deleteComment = async (req: Request, res: Response) => {
   try {
-    const userId = req.session.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({ message: "Utilisateur non authentifié." });
-    }
+    const userId = req.session.user!.id;
 
     const { id: postId, commentId } = req.params;
 
