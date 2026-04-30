@@ -25,6 +25,16 @@
     Filtrer
   </button>
 
+  <label class="inline-flex items-center gap-2 text-xs text-hn-muted">
+    <input
+      type="checkbox"
+      [ngModel]="hideShared()"
+      (ngModelChange)="applyHideShared($event)"
+      class="h-3.5 w-3.5 rounded border border-hn-border bg-hn-surface"
+    />
+    Masquer les partages
+  </label>
+
   @if (hasActiveFilters) {
     <button
       type="button"

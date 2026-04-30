@@ -12,9 +12,10 @@ export class PostsFilterComponent {
 
   sortOption = signal<'newest' | 'oldest' | 'mostLiked'>('newest');
   hashtagInput = signal('');
+  hideShared = signal(false);
 
   get hasActiveFilters(): boolean {
-    return this.sortOption() !== 'newest' || this.hashtagInput().trim() !== '';
+    return this.sortOption() !== 'newest' || this.hashtagInput().trim() !== '' || this.hideShared();
   }
 
   applySort(sort: 'newest' | 'oldest' | 'mostLiked'): void {
@@ -26,9 +27,15 @@ export class PostsFilterComponent {
     this.emit();
   }
 
+  applyHideShared(value: boolean): void {
+    this.hideShared.set(value);
+    this.emit();
+  }
+
   clearFilters(): void {
     this.sortOption.set('newest');
     this.hashtagInput.set('');
+    this.hideShared.set(false);
     this.emit();
   }
 
@@ -36,6 +43,7 @@ export class PostsFilterComponent {
     this.filterChanged.emit({
       sort: this.sortOption(),
       hashtag: this.hashtagInput().trim() || undefined,
+      hideShared: this.hideShared() || undefined,
     });
   }
 }

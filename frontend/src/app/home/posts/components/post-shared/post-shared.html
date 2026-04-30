@@ -18,7 +18,9 @@
     @if ((shared.hashtags ?? []).length) {
       <div class="flex flex-wrap gap-2 mt-2">
         @for (tag of shared.hashtags ?? []; track tag) {
-          <span class="px-2 py-0.5 text-xs rounded-full bg-hn-surface text-hn-muted border border-hn-border">
+          <span
+            class="px-2 py-0.5 text-xs rounded-full bg-hn-surface text-hn-muted border border-hn-border"
+          >
             {{ tag }}
           </span>
         }
@@ -27,6 +29,6 @@
   </div>
 } @else {
   <div class="rounded border border-hn-border bg-hn-bg p-3 mb-3 text-xs text-hn-muted italic">
-    Le post original n'est plus disponible.
+    Post original indisponible.
   </div>
 }

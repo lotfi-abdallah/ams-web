@@ -26,6 +26,9 @@ export const getPosts = async (req: Request, res: Response) => {
         ? rawHashtag.replace(/^#/, "")
         : null;
     const authorParam = req.query.author ? Number(req.query.author) : null;
+    const hideSharedParam = req.query.hideShared
+      ? String(req.query.hideShared).toLowerCase()
+      : "";
 
     const sortMap: Record<string, Record<string, 1 | -1>> = {
       newest: { _id: -1 },
@@ -40,6 +43,13 @@ export const getPosts = async (req: Request, res: Response) => {
     }
     if (authorParam && Number.isInteger(authorParam)) {
       filter.createdBy = authorParam;
+    }
+    if (
+      hideSharedParam === "true" ||
+      hideSharedParam === "1" ||
+      hideSharedParam === "yes"
+    ) {
+      filter.shared = null;
     }
 
     const [posts, totalPosts] = await Promise.all([
