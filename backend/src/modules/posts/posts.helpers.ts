@@ -1,8 +1,15 @@
+import { Types } from "mongoose";
 import { pool } from "../../config/postgres";
 import { Compte } from "../../types/Compte";
 import { Post } from "./posts.model";
 
 type UserPreview = Pick<Compte, "id" | "pseudo" | "nom" | "prenom" | "avatar">;
+
+const isValidObjectId = (value: unknown): boolean => {
+  if (value == null) return false;
+  const str = typeof value === "string" ? value : String(value);
+  return Types.ObjectId.isValid(str) && /^[0-9a-fA-F]{24}$/.test(str);
+};
 
 const getUsersMapByIds = async (
   userIds: number[],
@@ -61,7 +68,7 @@ const attachUsers = (post: any, usersMap: Map<number, UserPreview>): any => ({
 export const enrichPostsWithUsers = async (posts: any[]): Promise<any[]> => {
   const sharedIds = posts
     .map((post) => post?.shared)
-    .filter((id: unknown) => id != null)
+    .filter(isValidObjectId)
     .map((id: any) => id.toString());
 
   const sharedPostsMap = new Map<string, any>();
@@ -80,9 +87,13 @@ export const enrichPostsWithUsers = async (posts: any[]): Promise<any[]> => {
 
   return posts.map((post) => {
     const enriched = attachUsers(post, usersMap);
-    if (post?.shared != null) {
+    if (isValidObjectId(post?.shared)) {
+      enriched.shared = post.shared.toString();
       enriched.sharedPost =
         sharedPostsMap.get(post.shared.toString()) ?? null;
+    } else {
+      enriched.shared = null;
+      enriched.sharedPost = null;
     }
     return enriched;
   });

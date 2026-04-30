@@ -75,6 +75,10 @@ export class PostsService {
       .pipe(map((response) => response.post));
   }
 
+  sharePost(postId: string, body: string): Observable<Post> {
+    return this.api.post<Post>(`posts/${postId}/share`, { body });
+  }
+
   notifyTimelineRefresh() {
     this.refreshTimelineSubject.next();
   }

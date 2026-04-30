@@ -34,4 +34,6 @@ export interface Post {
   likedBy: number[];
   hashtags?: string[];
   comments: Comment[];
+  shared?: string | null;
+  sharedPost?: Post | null;
 }

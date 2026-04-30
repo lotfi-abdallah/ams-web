@@ -6,11 +6,12 @@ import { PostHeader } from './components/post-header/post-header';
 import { PostBody } from './components/post-body/post-body';
 import { PostActions } from './components/post-actions/post-actions';
 import { PostComments } from './components/post-comments/post-comments';
+import { PostShared } from './components/post-shared/post-shared';
 import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-post',
-  imports: [PostHeader, PostBody, PostActions, PostComments],
+  imports: [PostHeader, PostBody, PostActions, PostComments, PostShared],
   templateUrl: './post.html',
 })
 export class PostCard {

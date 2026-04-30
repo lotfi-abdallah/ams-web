@@ -9,6 +9,10 @@
   @if (!isWrapped()) {
     <app-post-body [post]="post()" />
 
+    @if (post().shared) {
+      <app-post-shared [sharedPost]="post().sharedPost" />
+    }
+
     <app-post-actions
       [post]="post()"
       [isLikeLoading]="isLikeLoading()"
