@@ -3,6 +3,7 @@ import {
   updateConnectionStatus,
   validateUserCredentials,
 } from "./auth.helpers";
+import { getSocket } from "../../config/socket";
 
 /**
  * Contrôleur pour la connexion de l'utilisateur.
@@ -35,6 +36,14 @@ export const loginUser = async (req: Request, res: Response) => {
       username: user.pseudo,
     };
 
+    getSocket().emit("user:connected", {
+      id: user.id,
+      pseudo: user.pseudo,
+      nom: user.nom,
+      prenom: user.prenom,
+      avatar: user.avatar,
+    });
+
     return res.status(200).json({
       message: "Login successful",
       user: {
@@ -57,6 +66,7 @@ export const logoutUser = async (req: Request, res: Response) => {
   }
 
   const userId = req.session.user.id;
+  const pseudo = req.session.user.username;
 
   try {
     const isUpdated = await updateConnectionStatus(userId, 0);
@@ -67,6 +77,8 @@ export const logoutUser = async (req: Request, res: Response) => {
         .status(500)
         .json({ message: "Impossible de mettre à jour le statut de connexion." });
     }
+
+    getSocket().emit("user:disconnected", { id: userId, pseudo });
 
     req.session.destroy((err) => {
       if (err) {
