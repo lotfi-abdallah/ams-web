@@ -308,34 +308,35 @@ export const deletePost = async (req: Request, res: Response) => {
 export const likePost = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const post = await Post.findById(id);
-
-    if (!post) {
-      return res.status(404).json({ message: "Post introuvable." });
-    }
-
     const userId = req.session.user!.id;
+    const updatedPost = await Post.findOneAndUpdate(
+      { _id: id, likedBy: { $ne: userId } },
+      { $addToSet: { likedBy: userId }, $inc: { likes: 1 } },
+      { new: true },
+    );
 
-    if (post.likedBy.includes(userId)) {
+    if (!updatedPost) {
+      const exists = await Post.exists({ _id: id });
+      if (!exists) {
+        return res.status(404).json({ message: "Post introuvable." });
+      }
       return res
         .status(400)
         .json({ message: "Post déjà aimé par cet utilisateur." });
     }
 
-    post.likedBy.push(userId);
-    post.likes = post.likedBy.length;
-    await post.save();
-
-    if (post.createdBy !== userId) {
+    if (updatedPost.createdBy !== userId) {
       getSocket()
-        .to(`user:${post.createdBy}`)
+        .to(`user:${updatedPost.createdBy}`)
         .emit("post:liked", {
-          postId: post._id.toString(),
+          postId: updatedPost._id.toString(),
           by: { id: userId, pseudo: req.session.user!.username },
         });
     }
 
-    res.status(200).json({ message: "Post aimé avec succès.", post });
+    res
+      .status(200)
+      .json({ message: "Post aimé avec succès.", post: updatedPost });
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de l'ajout du like.", error });
   }
@@ -351,25 +352,27 @@ export const likePost = async (req: Request, res: Response) => {
 export const unlikePost = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const post = await Post.findById(id);
-
-    if (!post) {
-      return res.status(404).json({ message: "Post introuvable." });
-    }
-
     const userId = req.session.user!.id;
 
-    if (!post.likedBy.includes(userId)) {
+    const updatedPost = await Post.findOneAndUpdate(
+      { _id: id, likedBy: userId },
+      { $pull: { likedBy: userId }, $inc: { likes: -1 } },
+      { new: true },
+    );
+
+    if (!updatedPost) {
+      const exists = await Post.exists({ _id: id });
+      if (!exists) {
+        return res.status(404).json({ message: "Post introuvable." });
+      }
       return res
         .status(400)
         .json({ message: "Post non aimé par cet utilisateur." });
     }
 
-    post.likedBy = post.likedBy.filter((like) => like !== userId);
-    post.likes = post.likedBy.length;
-    await post.save();
-
-    res.status(200).json({ message: "Like retiré avec succès.", post });
+    res
+      .status(200)
+      .json({ message: "Like retiré avec succès.", post: updatedPost });
   } catch (error) {
     res.status(500).json({ message: "Erreur lors du retrait du like.", error });
   }
