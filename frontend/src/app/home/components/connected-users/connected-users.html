@@ -1,0 +1,35 @@
+<section class="bg-hn-surface border border-hn-border rounded p-4">
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="text-sm font-semibold text-hn-text">Internautes connectes</h2>
+    <span class="text-xs text-hn-muted">{{ users().length }}</span>
+  </div>
+
+  @if (users().length === 0) {
+    <p class="text-xs text-hn-muted">Aucun internaute connecte.</p>
+  } @else {
+    <ul class="space-y-3">
+      @for (user of users(); track user.id) {
+        <li class="flex items-center gap-2">
+          @if (user.avatar) {
+            <img
+              [src]="user.avatar"
+              [alt]="displayName(user)"
+              class="w-8 h-8 rounded-full border border-hn-border object-cover"
+            />
+          } @else {
+            <div
+              class="w-8 h-8 rounded-full bg-hn-bg text-hn-muted flex items-center justify-center text-xs font-semibold border border-hn-border"
+              aria-hidden="true"
+            >
+              {{ initial(user) }}
+            </div>
+          }
+          <div class="min-w-0">
+            <p class="text-sm text-hn-text truncate">{{ displayName(user) }}</p>
+            <p class="text-xs text-hn-muted truncate">{{ secondaryName(user) }}</p>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>
