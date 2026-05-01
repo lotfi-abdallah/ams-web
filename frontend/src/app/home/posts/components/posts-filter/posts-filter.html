@@ -9,6 +9,43 @@
     <option value="mostLiked">Plus aimés</option>
   </select>
 
+  <div
+    class="inline-flex items-center gap-1 rounded border border-hn-border bg-hn-surface p-1 text-xs"
+  >
+    <button
+      type="button"
+      (click)="applyOwner('all')"
+      class="px-2 py-1 rounded border border-transparent"
+      [class.bg-hn-bg]="ownerOption() === 'all'"
+      [class.text-hn-text]="ownerOption() === 'all'"
+      [class.text-hn-muted]="ownerOption() !== 'all'"
+    >
+      Tous
+    </button>
+    <button
+      type="button"
+      (click)="applyOwner('mine')"
+      [disabled]="!currentUser()?.id"
+      class="px-2 py-1 rounded border border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
+      [class.bg-hn-bg]="ownerOption() === 'mine'"
+      [class.text-hn-text]="ownerOption() === 'mine'"
+      [class.text-hn-muted]="ownerOption() !== 'mine'"
+    >
+      Mes posts
+    </button>
+    <button
+      type="button"
+      (click)="applyOwner('others')"
+      [disabled]="!currentUser()?.id"
+      class="px-2 py-1 rounded border border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
+      [class.bg-hn-bg]="ownerOption() === 'others'"
+      [class.text-hn-text]="ownerOption() === 'others'"
+      [class.text-hn-muted]="ownerOption() !== 'others'"
+    >
+      Autres
+    </button>
+  </div>
+
   <input
     type="text"
     placeholder="Filtrer par hashtag..."

@@ -7,6 +7,7 @@ export interface PostsFilter {
   sort?: 'newest' | 'oldest' | 'mostLiked';
   hashtag?: string;
   author?: number;
+  excludeAuthor?: number;
   hideShared?: boolean;
 }
 
@@ -44,6 +45,7 @@ export class PostsService {
     if (filter.sort) params.set('sort', filter.sort);
     if (filter.hashtag) params.set('hashtag', filter.hashtag);
     if (filter.author) params.set('author', String(filter.author));
+    if (filter.excludeAuthor) params.set('excludeAuthor', String(filter.excludeAuthor));
     if (filter.hideShared) params.set('hideShared', 'true');
     return this.api.get<PaginatedPostsResponse>(`posts?${params.toString()}`);
   }

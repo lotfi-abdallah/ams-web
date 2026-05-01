@@ -26,6 +26,9 @@ export const getPosts = async (req: Request, res: Response) => {
         ? rawHashtag.replace(/^#/, "")
         : null;
     const authorParam = req.query.author ? Number(req.query.author) : null;
+    const excludeAuthorParam = req.query.excludeAuthor
+      ? Number(req.query.excludeAuthor)
+      : null;
     const hideSharedParam = req.query.hideShared
       ? String(req.query.hideShared).toLowerCase()
       : "";
@@ -43,6 +46,8 @@ export const getPosts = async (req: Request, res: Response) => {
     }
     if (authorParam && Number.isInteger(authorParam)) {
       filter.createdBy = authorParam;
+    } else if (excludeAuthorParam && Number.isInteger(excludeAuthorParam)) {
+      filter.createdBy = { $ne: excludeAuthorParam };
     }
     if (
       hideSharedParam === "true" ||
