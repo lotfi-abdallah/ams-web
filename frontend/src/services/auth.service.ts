@@ -3,6 +3,7 @@ import { ApiService } from './api.service';
 import { SocketService } from './socket.service';
 import { tap } from 'rxjs';
 import { User } from '../models';
+import { ConnectedUsersService } from './connected-users.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -12,6 +13,7 @@ export class AuthService {
   constructor(
     private api: ApiService,
     private socket: SocketService,
+    private connectedUsers: ConnectedUsersService,
   ) {}
 
   bootstrap(): void {
@@ -25,14 +27,25 @@ export class AuthService {
   }
 
   logout() {
-    return this.api.post('auth/logout', {}).pipe(tap(() => this._user.set(null)));
+    return this.api.post('auth/logout', {}).pipe(
+      tap(() => {
+        this._user.set(null);
+        this.connectedUsers.clear();
+      }),
+    );
   }
 
   fetchCurrentUser() {
     return this.api.get('auth/me').pipe(
       tap({
-        next: (response: any) => this._user.set(response.user),
-        error: () => this._user.set(null),
+        next: (response: any) => {
+          this._user.set(response.user);
+          this.connectedUsers.refresh();
+        },
+        error: () => {
+          this._user.set(null);
+          this.connectedUsers.clear();
+        },
       }),
     );
   }

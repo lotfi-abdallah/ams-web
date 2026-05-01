@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { Header } from './components/header/header';
 import { AuthService } from '../services/auth.service';
 import { NotificationListenerService } from '../services/notification-listener.service';
+import { ConnectedUsersService } from '../services/connected-users.service';
 
 @Component({
   selector: 'app-root',
@@ -16,10 +17,12 @@ export class App implements OnInit {
   constructor(
     private auth: AuthService,
     private notifListener: NotificationListenerService,
+    private connectedUsers: ConnectedUsersService,
   ) {}
 
   ngOnInit(): void {
     this.notifListener.start();
+    this.connectedUsers.start();
     this.auth.bootstrap();
   }
 }
