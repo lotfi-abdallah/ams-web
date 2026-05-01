@@ -11,7 +11,7 @@ import { AuthService } from '../../../../../services/auth.service';
 export class PostsFilterComponent {
   filterChanged = output<PostsFilter>();
 
-  sortOption = signal<'newest' | 'oldest' | 'mostLiked'>('newest');
+  sortOption = signal<'newest' | 'oldest' | 'mostLiked' | 'author'>('newest');
   hashtagInput = signal('');
   hideShared = signal(false);
   ownerOption = signal<'all' | 'mine' | 'others'>('all');
@@ -30,7 +30,7 @@ export class PostsFilterComponent {
     );
   }
 
-  applySort(sort: 'newest' | 'oldest' | 'mostLiked'): void {
+  applySort(sort: 'newest' | 'oldest' | 'mostLiked' | 'author'): void {
     this.sortOption.set(sort);
     this.emit();
   }

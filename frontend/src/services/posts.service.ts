@@ -4,7 +4,7 @@ import { map, Observable, Subject } from 'rxjs';
 import { Post } from '../models';
 
 export interface PostsFilter {
-  sort?: 'newest' | 'oldest' | 'mostLiked';
+  sort?: 'newest' | 'oldest' | 'mostLiked' | 'author';
   hashtag?: string;
   author?: number;
   excludeAuthor?: number;

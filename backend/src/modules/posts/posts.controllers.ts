@@ -37,6 +37,7 @@ export const getPosts = async (req: Request, res: Response) => {
       newest: { _id: -1 },
       oldest: { _id: 1 },
       mostLiked: { likes: -1 },
+      author: { createdBy: 1, _id: -1 },
     };
     const sortOrder = sortMap[sortParam] ?? sortMap["newest"];
 
