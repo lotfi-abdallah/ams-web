@@ -2,6 +2,8 @@ import { pool } from "../../config/postgres";
 import crypto from "crypto";
 import { Compte } from "../../types/Compte";
 
+type UserPreview = Pick<Compte, "id" | "pseudo" | "nom" | "prenom" | "avatar">;
+
 export const validateUserCredentials = async (
   email: string,
   password: string,
@@ -41,4 +43,17 @@ export const updateConnectionStatus = async (
     console.error("Error updating connection status:", error);
     return false;
   }
+};
+
+export const getConnectedUsers = async (): Promise<UserPreview[]> => {
+  const result = await pool.query<UserPreview>(
+    `
+      SELECT id, pseudo, nom, prenom, avatar
+      FROM fredouil.compte
+      WHERE statut_connexion = 1
+      ORDER BY id ASC
+    `,
+  );
+
+  return result.rows;
 };

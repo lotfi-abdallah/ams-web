@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import {
+  getConnectedUsers,
   updateConnectionStatus,
   validateUserCredentials,
 } from "./auth.helpers";
@@ -18,7 +19,9 @@ export const loginUser = async (req: Request, res: Response) => {
 
     if (!user) {
       console.log("no user found with email:", email);
-      return res.status(401).json({ message: "Email ou mot de passe invalide." });
+      return res
+        .status(401)
+        .json({ message: "Email ou mot de passe invalide." });
     }
 
     const isUpdated = await updateConnectionStatus(user.id, 1);
@@ -27,7 +30,9 @@ export const loginUser = async (req: Request, res: Response) => {
       console.log("Failed to update connection status for user:", user.id);
       return res
         .status(500)
-        .json({ message: "Impossible de mettre à jour le statut de connexion." });
+        .json({
+          message: "Impossible de mettre à jour le statut de connexion.",
+        });
     }
 
     req.session.user = {
@@ -71,7 +76,9 @@ export const logoutUser = async (req: Request, res: Response) => {
       console.log("Failed to update connection status for user:", userId);
       return res
         .status(500)
-        .json({ message: "Impossible de mettre à jour le statut de connexion." });
+        .json({
+          message: "Impossible de mettre à jour le statut de connexion.",
+        });
     }
 
     getSocket().emit("user:disconnected", { id: userId, pseudo });
@@ -92,4 +99,14 @@ export const logoutUser = async (req: Request, res: Response) => {
 
 export const getMe = (req: Request, res: Response) => {
   return res.status(200).json({ user: req.session.user });
+};
+
+export const listConnectedUsers = async (_req: Request, res: Response) => {
+  try {
+    const users = await getConnectedUsers();
+    return res.status(200).json({ users });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erreur serveur." });
+  }
 };
