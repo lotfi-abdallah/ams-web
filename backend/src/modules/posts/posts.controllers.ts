@@ -241,18 +241,24 @@ export const updatePost = async (req: Request, res: Response) => {
           .filter((tag) => tag.length > 0)
       : undefined;
 
-    post.body = body.trim();
+    const updateFields: Record<string, any> = { body: body.trim() };
     if (normalizedHashtags) {
-      post.hashtags = [...new Set(normalizedHashtags)];
+      updateFields.hashtags = [...new Set(normalizedHashtags)];
     }
-    post.images =
-      normalizedImageUrl && normalizedImageTitle
-        ? { url: normalizedImageUrl, title: normalizedImageTitle }
-        : undefined;
 
-    await post.save();
+    const updateOp: Record<string, any> = { $set: updateFields };
+    if (normalizedImageUrl && normalizedImageTitle) {
+      updateOp.$set.images = { url: normalizedImageUrl, title: normalizedImageTitle };
+    } else {
+      updateOp.$unset = { images: "" };
+    }
 
-    const enrichedPost = await enrichPostWithUsers(post.toObject() as any);
+    const updatedPostDoc = await Post.findByIdAndUpdate(id, updateOp, { new: true });
+    if (!updatedPostDoc) {
+      return res.status(404).json({ message: "Post introuvable." });
+    }
+
+    const enrichedPost = await enrichPostWithUsers(updatedPostDoc.toObject() as any);
     res.status(200).json(enrichedPost);
   } catch (error) {
     res
@@ -392,12 +398,6 @@ export const addComment = async (req: Request, res: Response) => {
     const rawText = typeof req.body?.text === "string" ? req.body.text : "";
     const text = rawText.trim();
 
-    const post = await Post.findById(id);
-
-    if (!post) {
-      return res.status(404).json({ message: "Post introuvable." });
-    }
-
     const userId = req.session.user!.id;
 
     if (!text) {
@@ -419,19 +419,26 @@ export const addComment = async (req: Request, res: Response) => {
       hour: commentHour,
     };
 
-    post.comments.push(newComment);
-    await post.save();
+    const updatedPost = await Post.findByIdAndUpdate(
+      id,
+      { $push: { comments: newComment } },
+      { new: true, runValidators: false },
+    );
 
-    if (post.createdBy !== userId) {
+    if (!updatedPost) {
+      return res.status(404).json({ message: "Post introuvable." });
+    }
+
+    if (updatedPost.createdBy !== userId) {
       getSocket()
-        .to(`user:${post.createdBy}`)
+        .to(`user:${updatedPost.createdBy}`)
         .emit("post:commented", {
-          postId: post._id.toString(),
+          postId: updatedPost._id.toString(),
           by: { id: userId, pseudo: req.session.user!.username },
         });
     }
 
-    const enrichedPost = await enrichPostWithUsers(post.toObject() as any);
+    const enrichedPost = await enrichPostWithUsers(updatedPost.toObject() as any);
     res
       .status(200)
       .json({ message: "Commentaire ajouté avec succès.", post: enrichedPost });
@@ -543,12 +550,17 @@ export const deleteComment = async (req: Request, res: Response) => {
         .json({ message: "Non autorisé à supprimer ce commentaire." });
     }
 
-    post.comments = post.comments.filter(
-      (c) => c._id?.toString() !== commentId,
+    const updatedPost = await Post.findByIdAndUpdate(
+      postId,
+      { $pull: { comments: { _id: commentId } } },
+      { new: true, runValidators: false },
     );
-    await post.save();
 
-    const enrichedPost = await enrichPostWithUsers(post.toObject() as any);
+    if (!updatedPost) {
+      return res.status(404).json({ message: "Post introuvable." });
+    }
+
+    const enrichedPost = await enrichPostWithUsers(updatedPost.toObject() as any);
     res.status(200).json({
       message: "Commentaire supprimé avec succès.",
       post: enrichedPost,
