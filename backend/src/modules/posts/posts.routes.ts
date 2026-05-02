@@ -6,10 +6,10 @@ import {
   updatePost,
   deletePost,
   likePost,
-  addComment,
   unlikePost,
-  deleteComment,
   sharePost,
+  addComment,
+  deleteComment,
 } from "./posts.controllers";
 import { requireAuth } from "../../middlewares/auth.middleware";
 
