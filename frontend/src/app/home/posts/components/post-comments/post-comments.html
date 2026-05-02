@@ -12,17 +12,59 @@
               {{ comment.commentedByUser?.pseudo || 'User #' + comment.commentedBy }}
             </p>
             <p class="text-xs text-hn-muted">{{ comment.date }} {{ comment.hour }}</p>
-            <p class="text-sm text-hn-text whitespace-pre-wrap mt-1">{{ comment.text }}</p>
+            @if (editingIndex === $index) {
+              <textarea
+                [(ngModel)]="editText"
+                (keydown.control.enter)="submitEdit($index)"
+                (keydown.escape)="cancelEdit()"
+                rows="2"
+                [disabled]="isEditSubmitting"
+                class="w-full text-sm rounded border border-hn-border bg-hn-bg text-hn-text px-2 py-1 resize-none focus:outline-none focus:border-hn-orange mt-1"
+              ></textarea>
+              <div class="flex gap-1 mt-1">
+                <button
+                  type="button"
+                  (click)="submitEdit($index)"
+                  [disabled]="isEditSubmitting || !editText.trim()"
+                  class="cursor-pointer text-xs text-green-600 hover:text-green-800 border border-green-200 rounded px-2 py-0.5 disabled:opacity-60"
+                >
+                  <svg [lucideIcon]="confirmIcon" class="w-3.5 h-3.5"></svg>
+                </button>
+                <button
+                  type="button"
+                  (click)="cancelEdit()"
+                  class="cursor-pointer text-xs text-hn-muted hover:text-hn-text border border-hn-border rounded px-2 py-0.5"
+                >
+                  <svg [lucideIcon]="cancelIcon" class="w-3.5 h-3.5"></svg>
+                </button>
+              </div>
+            } @else {
+              <p class="text-sm text-hn-text whitespace-pre-wrap mt-1">{{ comment.text }}</p>
+            }
           </div>
-          @if (canDelete(comment.commentedBy)) {
-            <button
-              type="button"
-              (click)="deleteComment($index)"
-              class="cursor-pointer shrink-0 text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-1"
-              aria-label="Supprimer le commentaire"
-            >
-              <svg [lucideIcon]="trashIcon" class="w-3.5 h-3.5"></svg>
-            </button>
+          @if (editingIndex !== $index) {
+            <div class="flex gap-1 shrink-0">
+              @if (canEdit(comment.commentedBy)) {
+                <button
+                  type="button"
+                  (click)="startEdit($index, comment.text)"
+                  class="cursor-pointer text-xs text-hn-muted hover:text-hn-text border border-hn-border rounded px-2 py-1"
+                  aria-label="Modifier le commentaire"
+                >
+                  <svg [lucideIcon]="editIcon" class="w-3.5 h-3.5"></svg>
+                </button>
+              }
+              @if (canDelete(comment.commentedBy)) {
+                <button
+                  type="button"
+                  (click)="deleteComment($index)"
+                  class="cursor-pointer text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-1"
+                  aria-label="Supprimer le commentaire"
+                >
+                  <svg [lucideIcon]="trashIcon" class="w-3.5 h-3.5"></svg>
+                </button>
+              }
+            </div>
           }
         </article>
       }

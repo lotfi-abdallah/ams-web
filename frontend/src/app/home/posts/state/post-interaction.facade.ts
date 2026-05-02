@@ -99,6 +99,23 @@ export class PostInteractionFacade {
     );
   }
 
+  updateComment(post: PostModel, commentIndex: number, text: string): Observable<void> {
+    const postId = post._id;
+    if (!postId || commentIndex < 0) {
+      return EMPTY;
+    }
+
+    return this.postsService.updateComment(postId, commentIndex, text).pipe(
+      map((updatedPost: PostModel) => {
+        post.comments = updatedPost.comments;
+      }),
+      catchError((error) => {
+        this.notification.error('Impossible de modifier le commentaire.');
+        return throwError(() => error);
+      }),
+    );
+  }
+
   deleteComment(post: PostModel, commentIndex: number): Observable<void> {
     const postId = post._id;
     if (!postId || commentIndex < 0) {

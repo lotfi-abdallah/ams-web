@@ -81,6 +81,12 @@ export class PostsService {
       .pipe(map((response) => response.post));
   }
 
+  updateComment(postId: string, commentIndex: number, text: string): Observable<Post> {
+    return this.api
+      .put<{ post: Post }>(`posts/${postId}/comment/${commentIndex}`, { text })
+      .pipe(map((response) => response.post));
+  }
+
   deleteComment(postId: string, commentIndex: number): Observable<Post> {
     return this.api
       .delete<{ post: Post }>(`posts/${postId}/comment/${commentIndex}`)

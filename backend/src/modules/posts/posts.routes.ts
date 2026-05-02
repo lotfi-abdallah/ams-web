@@ -9,6 +9,7 @@ import {
   unlikePost,
   sharePost,
   addComment,
+  updateComment,
   deleteComment,
 } from "./posts.controllers";
 import { requireAuth } from "../../middlewares/auth.middleware";
@@ -23,6 +24,7 @@ router.delete("/:id", requireAuth, deletePost);
 router.post("/:id/like", requireAuth, likePost);
 router.post("/:id/unlike", requireAuth, unlikePost);
 router.post("/:id/comment", requireAuth, addComment);
+router.put("/:id/comment/:commentIndex", requireAuth, updateComment);
 router.delete("/:id/comment/:commentIndex", requireAuth, deleteComment);
 router.post("/:id/share", requireAuth, sharePost);
 
