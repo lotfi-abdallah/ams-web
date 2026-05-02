@@ -9,7 +9,6 @@ export interface User {
 }
 
 export interface Comment {
-  _id?: string;
   text: string;
   commentedBy: number;
   commentedByUser?: Pick<User, 'id' | 'pseudo' | 'nom' | 'prenom' | 'avatar'> | null;

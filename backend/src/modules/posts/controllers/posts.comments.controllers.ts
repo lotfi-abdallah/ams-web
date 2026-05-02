@@ -63,7 +63,12 @@ export const addComment = async (req: Request, res: Response) => {
 export const deleteComment = async (req: Request, res: Response) => {
   try {
     const userId = req.session.user!.id;
-    const { id: postId, commentId } = req.params;
+    const { id: postId, commentIndex: commentIndexParam } = req.params;
+
+    const index = Number(commentIndexParam);
+    if (!Number.isInteger(index) || index < 0) {
+      return res.status(400).json({ message: "Index de commentaire invalide." });
+    }
 
     const post = await Post.findById(postId);
 
@@ -71,7 +76,7 @@ export const deleteComment = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Post introuvable." });
     }
 
-    const comment = post.comments.find((c) => c._id?.toString() === commentId);
+    const comment = post.comments[index];
 
     if (!comment) {
       return res.status(404).json({ message: "Commentaire introuvable." });
@@ -83,9 +88,10 @@ export const deleteComment = async (req: Request, res: Response) => {
         .json({ message: "Non autorisé à supprimer ce commentaire." });
     }
 
+    post.comments.splice(index, 1);
     const updatedPost = await Post.findByIdAndUpdate(
       postId,
-      { $pull: { comments: { _id: commentId } } },
+      { $set: { comments: post.comments } },
       { new: true, runValidators: false },
     );
 

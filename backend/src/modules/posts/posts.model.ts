@@ -5,7 +5,6 @@ interface Comment {
   commentedBy: number;
   date: string;
   hour: string;
-  _id?: Schema.Types.ObjectId;
 }
 
 interface PostImage {
@@ -35,12 +34,15 @@ const getCurrentHour = () => {
   return `${hours}:${minutes}`;
 };
 
-const commentSchema = new Schema<Comment>({
-  text: { type: String, required: true },
-  commentedBy: { type: Number, required: true },
-  date: { type: String, default: getCurrentDate },
-  hour: { type: String, default: getCurrentHour },
-});
+const commentSchema = new Schema<Comment>(
+  {
+    text: { type: String, required: true },
+    commentedBy: { type: Number, required: true },
+    date: { type: String, default: getCurrentDate },
+    hour: { type: String, default: getCurrentHour },
+  },
+  { _id: false },
+);
 
 const imageSchema = new Schema<PostImage>(
   {

@@ -48,8 +48,8 @@ export class PostComments {
     });
   }
 
-  deleteComment(commentId: string): void {
-    this.facade.deleteComment(this.post(), commentId).subscribe({
+  deleteComment(commentIndex: number): void {
+    this.facade.deleteComment(this.post(), commentIndex).subscribe({
       next: () => this.postUpdated.emit({ ...this.post() }),
     });
   }

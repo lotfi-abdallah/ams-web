@@ -81,9 +81,9 @@ export class PostsService {
       .pipe(map((response) => response.post));
   }
 
-  deleteComment(postId: string, commentId: string): Observable<Post> {
+  deleteComment(postId: string, commentIndex: number): Observable<Post> {
     return this.api
-      .delete<{ post: Post }>(`posts/${postId}/comment/${commentId}`)
+      .delete<{ post: Post }>(`posts/${postId}/comment/${commentIndex}`)
       .pipe(map((response) => response.post));
   }
 

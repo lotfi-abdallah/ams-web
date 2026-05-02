@@ -3,7 +3,7 @@
     @if (post().comments.length === 0) {
       <p class="text-xs text-hn-muted">Aucun commentaire pour le moment.</p>
     } @else {
-      @for (comment of post().comments; track comment._id ?? comment.date + comment.hour) {
+      @for (comment of post().comments; track $index) {
         <article
           class="rounded border border-hn-border bg-hn-bg p-2.5 flex justify-between items-start gap-2"
         >
@@ -14,10 +14,10 @@
             <p class="text-xs text-hn-muted">{{ comment.date }} {{ comment.hour }}</p>
             <p class="text-sm text-hn-text whitespace-pre-wrap mt-1">{{ comment.text }}</p>
           </div>
-          @if (comment._id && canDelete(comment.commentedBy)) {
+          @if (canDelete(comment.commentedBy)) {
             <button
               type="button"
-              (click)="deleteComment(comment._id)"
+              (click)="deleteComment($index)"
               class="cursor-pointer shrink-0 text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-1"
               aria-label="Supprimer le commentaire"
             >

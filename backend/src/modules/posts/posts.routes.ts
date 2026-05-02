@@ -23,7 +23,7 @@ router.delete("/:id", requireAuth, deletePost);
 router.post("/:id/like", requireAuth, likePost);
 router.post("/:id/unlike", requireAuth, unlikePost);
 router.post("/:id/comment", requireAuth, addComment);
-router.delete("/:id/comment/:commentId", requireAuth, deleteComment);
+router.delete("/:id/comment/:commentIndex", requireAuth, deleteComment);
 router.post("/:id/share", requireAuth, sharePost);
 
 export default router;

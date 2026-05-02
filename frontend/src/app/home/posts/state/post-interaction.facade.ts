@@ -99,13 +99,13 @@ export class PostInteractionFacade {
     );
   }
 
-  deleteComment(post: PostModel, commentId: string): Observable<void> {
+  deleteComment(post: PostModel, commentIndex: number): Observable<void> {
     const postId = post._id;
-    if (!postId || !commentId) {
+    if (!postId || commentIndex < 0) {
       return EMPTY;
     }
 
-    return this.postsService.deleteComment(postId, commentId).pipe(
+    return this.postsService.deleteComment(postId, commentIndex).pipe(
       map((updatedPost: PostModel) => {
         post.comments = updatedPost.comments;
       }),
