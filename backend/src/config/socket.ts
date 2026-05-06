@@ -11,19 +11,23 @@ type SessionRequest = IncomingMessage & {
   session?: Session & Partial<SessionData>;
 };
 
-const wrapSessionMiddleware =
-  (middleware: RequestHandler) =>
-  (socket: Socket, next: (err?: Error) => void) =>
+/**
+ * Adapte un middleware Express pour qu'il soit compatible avec Socket.IO,
+ * en simulant les objets req/res attendus par Express à partir du socket.
+ */
+function wrapSessionMiddleware(middleware: RequestHandler) {
+  return (socket: Socket, next: (err?: Error) => void) =>
     middleware(socket.request as any, {} as any, next as any);
+}
 
-const socketCorsOrigins = Array.from(
-  new Set([
-    `http://${env.host}:${env.frontendPort}`,
-    `https://${env.host}:${env.frontendPort}`,
-    `http://${env.host}:${env.httpPort}`,
-    `https://${env.host}:${env.httpsPort}`,
-  ]),
-);
+// const socketCorsOrigins = Array.from(
+//   new Set([
+//     `http://${env.host}:${env.frontendPort}`,
+//     `https://${env.host}:${env.frontendPort}`,
+//     `http://${env.host}:${env.httpPort}`,
+//     `https://${env.host}:${env.httpsPort}`,
+//   ]),
+// );
 
 export function initSocket(
   server: HttpsServer,
@@ -31,7 +35,7 @@ export function initSocket(
 ) {
   io = new Server(server, {
     cors: {
-      origin: socketCorsOrigins,
+      // origin: socketCorsOrigins,
       credentials: true,
     },
   });
