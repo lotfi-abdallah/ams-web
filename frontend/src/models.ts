@@ -1,11 +1,13 @@
 export interface User {
   id: number;
-  mail: string;
-  pseudo: string;
-  nom: string;
-  prenom: string;
-  avatar: string;
-  statut_connexion: number;
+  mail?: string;
+  email?: string;
+  pseudo?: string;
+  username?: string;
+  nom?: string;
+  prenom?: string;
+  avatar?: string;
+  statut_connexion?: number;
 }
 
 export interface Comment {

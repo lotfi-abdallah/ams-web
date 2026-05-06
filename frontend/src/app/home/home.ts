@@ -5,7 +5,7 @@ import { ConnectedUsers } from './components/connected-users/connected-users';
 
 @Component({
   selector: 'app-home',
-  imports: [Timeline, CreatePost, ConnectedUsers],
+  imports: [Timeline, CreatePost],
   templateUrl: './home.html',
 })
 export class Home {}

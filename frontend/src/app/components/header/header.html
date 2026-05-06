@@ -9,14 +9,31 @@
           <li><a href="/" class="text-sm text-hn-text hover:underline">Accueil</a></li>
         </ul>
       </nav>
-      <div class="flex space-x-4">
+      <div class="flex space-x-4 items-center">
         @if (auth.user()) {
-          <a
-            href="/profile"
-            class="px-3 py-1 text-sm text-hn-text border border-hn-border rounded bg-hn-bg hover:bg-hn-surface"
-          >
-            Profile
-          </a>
+          <span class="text-sm text-hn-text font-medium">
+            {{ auth.user()!.username }}
+          </span>
+          <div class="relative">
+            <button
+              (click)="showConnectedUsers = !showConnectedUsers"
+              class="px-3 py-1 text-sm text-hn-text border border-hn-border rounded bg-hn-bg hover:bg-hn-surface cursor-pointer flex items-center gap-1"
+            >
+              Connectés
+              @if (connectedUsers.users().length > 0) {
+                <span
+                  class="bg-hn-border text-hn-text text-xs rounded-full px-1.5 py-0.5 font-semibold"
+                >
+                  {{ connectedUsers.users().length }}
+                </span>
+              }
+            </button>
+            @if (showConnectedUsers) {
+              <div class="absolute right-0 top-full mt-1 w-64 z-50">
+                <app-connected-users />
+              </div>
+            }
+          </div>
           <button
             (click)="logout()"
             class="px-3 py-1 text-sm text-hn-text border border-hn-border rounded bg-hn-bg hover:bg-hn-surface cursor-pointer"
