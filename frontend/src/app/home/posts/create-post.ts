@@ -64,10 +64,7 @@ export class CreatePost {
       })
       .subscribe({
         next: () => {
-          this.body = '';
-          this.imageUrl = '';
-          this.imageTitle = '';
-          this.hashtags = '';
+          this.resetForm();
           this.postsService.notifyTimelineRefresh();
           this.notification.success('Post publié avec succès.');
           this.isSubmitting = false;
@@ -78,5 +75,12 @@ export class CreatePost {
           this.isSubmitting = false;
         },
       });
+  }
+
+  private resetForm() {
+    this.body = '';
+    this.imageUrl = '';
+    this.imageTitle = '';
+    this.hashtags = '';
   }
 }

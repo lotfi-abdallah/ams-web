@@ -29,21 +29,21 @@ import { PostsService } from '../../../services/posts.service';
 })
 export class PostCard {
   postInput = input.required<PostModel>({ alias: 'post' });
-  localPost = signal<PostModel | null>(null);
-  isWrapped = signal(false);
-  isLikeLoading = signal(false);
-  isCommentsOpen = signal(false);
-  showShareForm = signal(false);
-  shareError = signal('');
-  isShareSubmitting = signal(false);
   shareText = '';
-  isEditing = signal(false);
-  editError = signal('');
-  isEditSubmitting = signal(false);
   editBody = '';
   editImageUrl = '';
   editImageTitle = '';
   editHashtags = '';
+  localPost = signal<PostModel | null>(null);
+  shareError = signal('');
+  editError = signal('');
+  isWrapped = signal(false);
+  isEditing = signal(false);
+  isLikeLoading = signal(false);
+  isCommentsOpen = signal(false);
+  showShareForm = signal(false);
+  isShareSubmitting = signal(false);
+  isEditSubmitting = signal(false);
   isDeleteSubmitting = signal(false);
 
   post(): PostModel {
@@ -55,7 +55,7 @@ export class PostCard {
   }
 
   constructor(
-    private postInteraction: PostInteractionFacade,
+    private facade: PostInteractionFacade,
     private notification: NotificationService,
     private postsService: PostsService,
   ) {}
@@ -86,7 +86,7 @@ export class PostCard {
   }
 
   canManagePost(): boolean {
-    const userId = this.postInteraction.getCurrentUserIdValue();
+    const userId = this.facade.getCurrentUserIdValue();
     return userId !== null && userId === this.post().createdBy;
   }
 
@@ -151,7 +151,7 @@ export class PostCard {
     this.isEditSubmitting.set(true);
     this.editError.set('');
 
-    this.postInteraction
+    this.facade
       .updatePost(this.post(), {
         body: trimmedBody,
         imageUrl: trimmedImageUrl || undefined,
@@ -190,7 +190,7 @@ export class PostCard {
 
     this.isDeleteSubmitting.set(true);
 
-    this.postInteraction
+    this.facade
       .deletePost(this.post())
       .pipe(finalize(() => this.isDeleteSubmitting.set(false)))
       .subscribe({
@@ -215,7 +215,7 @@ export class PostCard {
       return;
     }
 
-    if (this.postInteraction.getCurrentUserIdValue() === null) {
+    if (this.facade.getCurrentUserIdValue() === null) {
       const message = 'Veuillez vous connecter pour partager une publication.';
       this.shareError.set(message);
       this.notification.error(message);
@@ -225,7 +225,7 @@ export class PostCard {
     this.isShareSubmitting.set(true);
     this.shareError.set('');
 
-    this.postInteraction
+    this.facade
       .sharePost(this.post()._id, trimmedBody)
       .pipe(finalize(() => this.isShareSubmitting.set(false)))
       .subscribe({
@@ -245,7 +245,7 @@ export class PostCard {
   }
 
   isLikedByCurrentUser() {
-    return this.postInteraction.isLikedByCurrentUser(this.post());
+    return this.facade.isLikedByCurrentUser(this.post());
   }
 
   toggleLike() {
@@ -254,7 +254,7 @@ export class PostCard {
     }
     this.isLikeLoading.set(true);
 
-    this.postInteraction
+    this.facade
       .toggleLike(this.post())
       .pipe(finalize(() => this.isLikeLoading.set(false)))
       .subscribe({
